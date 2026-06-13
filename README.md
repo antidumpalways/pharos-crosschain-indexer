@@ -158,28 +158,29 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 
 ---
 
-## Install & Use
+## Quick install
 
 ```bash
-# Option A: npm (recommended for AI agents - Claude Code, Cursor, OpenCode)
+# Claude Code (via gh CLI, v2.90.0+)
+gh skill install antidumpalways/pharos-crosschain-indexer
+
+# Manual (all agents — Claude Code, Cursor, OpenCode, Codex, Windsurf)
+git clone https://github.com/antidumpalways/pharos-crosschain-indexer ~/.claude/skills/pharos-crosschain-indexer
+
+# One-liner installer (all agents)
+bash <(curl -fsSL https://raw.githubusercontent.com/antidumpalways/pharos-crosschain-indexer/main/install.sh)
+
+# npm (all agents)
 npm install -g pharos-crosschain-indexer
-pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
-# Option B: npx (no install needed)
+# npx (no install)
 npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
-npx pharos-crosschain-indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
 
-# Option C: git clone (for contributors / local dev)
-git clone https://github.com/antidumpalways/pharos-crosschain-indexer
-cd pharos-crosschain-indexer
-bash install.sh
-./scripts/indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
-
-# Option D: download zip (GitHub Releases)
-unzip pharos-crosschain-indexer-v0.1.0.zip
-cd pharos-crosschain-indexer-v0.1.0
-bash install.sh
-./scripts/indexer help
+**Start querying:**
+```bash
+pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+pharos-crosschain-indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ```
 
 ---

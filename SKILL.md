@@ -95,6 +95,25 @@ For convenience, the networks used by this skill are:
 
 Read `assets/networks.json` for the complete config. The indexer queries all chains in the config that have an `explorerApiUrl` — add or remove chains by editing the JSON.
 
+## Quick Install
+
+```bash
+# Claude Code (via gh CLI, v2.90.0+)
+gh skill install antidumpalways/pharos-crosschain-indexer
+
+# Manual (all agents — Claude Code, Cursor, OpenCode, Codex, Windsurf)
+git clone https://github.com/antidumpalways/pharos-crosschain-indexer ~/.claude/skills/pharos-crosschain-indexer
+
+# One-liner installer (all agents)
+bash <(curl -fsSL https://raw.githubusercontent.com/antidumpalways/pharos-crosschain-indexer/main/install.sh)
+
+# npm (all agents)
+npm install -g pharos-crosschain-indexer
+
+# npx (no install)
+npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+```
+
 ## Capability Index
 
 | User Need | Capability | Detailed Instructions |
