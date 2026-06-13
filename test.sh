@@ -79,10 +79,21 @@ fi
 echo ""
 echo "5. Network connectivity"
 RPC="https://atlantic.dplabs-internal.com"
-if curl -s -o /dev/null -w '%{http_code}' --connect-timeout 10 "$RPC" 2>/dev/null | grep -q "200\|405\|404\|400"; then
-    pass "Atlantic RPC reachable"
+HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 10 -X POST -H "Content-Type: application/json" \
+    --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' "$RPC" 2>/dev/null) || HTTP_CODE="000"
+# eth_blockNumber returns a JSON-RPC response, not a standard HTTP status
+# Accept 200 (valid JSON-RPC response) only
+if [ "$HTTP_CODE" = "200" ]; then
+    BN=$(curl -s -X POST -H "Content-Type: application/json" \
+        --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+        --connect-timeout 10 "$RPC" 2>/dev/null | jq -r '.result // "0x0"')
+    if [ -n "$BN" ] && [ "$BN" != "0x0" ]; then
+        pass "Atlantic RPC reachable (block ${BN})"
+    else
+        skip "Atlantic RPC returned unexpected response" "Network may be in maintenance"
+    fi
 else
-    skip "Atlantic RPC unreachable" "Network may be down. Try later."
+    skip "Atlantic RPC unreachable (HTTP $HTTP_CODE)" "Network may be down"
 fi
 
 # ── Test 6: Real balance query ───────────────────────────────────

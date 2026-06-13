@@ -78,8 +78,23 @@ flowchart TB
 | **Reusability & Composability** | Add any chain to `assets/networks.json` — zero code changes. |
 | **Successful Deployment on Pharos** | Tested against live Atlantic RPC (`14.9555 PHRS` verified). No deploy needed. |
 | **User Experience & Documentation** | Mermaid architecture diagram. 5 commands. 2 demo scripts. Full reference file. |
-| **Vision Alignment** | Cross-chain = core Pharos narrative. Agent economy = agents need cross-chain awareness. |
+| **Vision Alignment** | Cross-chain = core Pharos narrative (CCIP/CCTP/LayerZero). Agent economy = agents need cross-chain awareness to operate, transact, and interact. This skill provides the data foundation every agent needs before acting across chains. |
 
+---
+
+## Pharos Vision Alignment
+
+Pharos is purpose-built for the AI Agent economy with cross-chain infrastructure (Chainlink CCIP, Circle CCTP, LayerZero) as a first-class primitive. But an agent cannot bridge assets, execute cross-chain swaps, or optimize multi-chain portfolios without first knowing **where its assets are**.
+
+This skill directly advances the Pharos vision by:
+
+| Pharos Goal | How This Skill Enables It |
+|---|---|
+| **Agent economy** | Every agent's first question before any action is "what do I have, where?" This skill answers that question across all 15 chains in one call. |
+| **Cross-chain interop** | Before bridging via CCIP/CCTP/LayerZero, an agent must verify source-chain balances and compare costs — this skill provides that data. |
+| **On-chain payments (x402)** | An agent pays from the chain with the highest USDC balance — this skill finds it. |
+| **RealFi & institutional** | Portfolio tracking across regulated chains enables compliance-grade asset reporting — the `audit-log` composability path supports this. |
+| **Developer ecosystem** | Every developer building on Pharos needs cross-chain data — this skill eliminates 15 separate explorer queries.
 ---
 
 ## Verifiable Proof (Judges: Run This)

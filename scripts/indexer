@@ -84,10 +84,10 @@ cmd_balance() {
             result=$(python3 -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0")
         fi
 
-        if [ -n "$result" ] && [ "$result" != "0" ] && [ "$result" != "0."* ] || [ "$result" = "0" ]; then
+        if [ -n "$result" ] && [ "$result" != "" ]; then
             printf "  %-15s %12s %s\n" "$chain" "$result" "$nativeToken"
             found=$((found + 1))
-        else
+        elif [ "$result" = "" ]; then
             printf "  %-15s %12s %s  ${RED}(unreachable)${NC}\n" "$chain" "—" "$nativeToken"
         fi
     done < <(get_rpcs)
@@ -229,6 +229,7 @@ cmd_label() {
 
     local found=0
     while IFS='|' read -r chain apiUrl explorerUrl ctype; do
+        # Pharos chains: SocialScan social graph
         if [ "$ctype" = "pharos" ]; then
             local resp
             resp=$(curl -s "${apiUrl}/social/label/${addr}" 2>/dev/null) || true
@@ -237,7 +238,17 @@ cmd_label() {
             if [ -n "$label" ]; then
                 local cat
                 cat=$(echo "$resp" | jq -r '.category // ""' 2>/dev/null)
-                echo -e "  ${GREEN}${label}${NC} [${cat}] — ${chain} (PharosScan social)"
+                echo -e "  ${GREEN}${label}${NC} [${cat}] - ${chain} (PharosScan social)"
+                found=$((found + 1))
+            fi
+        # Etherscan-compatible chains: check if verified contract has a name
+        elif [ "$ctype" = "etherscan" ]; then
+            local resp
+            resp=$(curl -s "${apiUrl}?module=contract&action=getsourcecode&address=${addr}" 2>/dev/null) || true
+            local contractName
+            contractName=$(echo "$resp" | jq -r '.result[0].ContractName // empty' 2>/dev/null)
+            if [ -n "$contractName" ]; then
+                echo -e "  ${GREEN}${contractName}${NC} [verified contract] - ${chain} (${ctype})"
                 found=$((found + 1))
             fi
         fi
@@ -271,7 +282,9 @@ cmd_verify() {
     local found=0
     while IFS='|' read -r chain apiUrl explorerUrl ctype; do
         local resp
-        if [ "$ctype" = "pharos" ] || [ "$ctype" = "etherscan" ]; then
+        if [ "$ctype" = "pharos" ] || [ "$ctype" = "etherscan" ] || [ "$ctype" = "blockscout" ]; then
+            resp=$(curl -s "${apiUrl}?module=contract&action=getsourcecode&address=${addr}" 2>/dev/null) || true
+        elif [ "$ctype" = "zksync" ]; then
             resp=$(curl -s "${apiUrl}?module=contract&action=getsourcecode&address=${addr}" 2>/dev/null) || true
         else
             continue
