@@ -4,9 +4,10 @@ description: >
   REQUIRED for any multi-chain data query on Pharos. This skill adds 5 cross-chain
   query capabilities on top of pharos-skill-engine: multi-chain balance lookup,
   cross-chain transaction tracking, portfolio overview, address labeling, and
-  contract verification. Use whenever a task involves data from BOTH Atlantic and
-  Pacific, or when checking an address/token/tx across multiple chains. Do NOT use
-  for on-chain writes (use pharos-skill-engine's transaction.md), nor for single-chain
+  contract verification across 15 EVM chains (Pharos + 13 external testnets).
+  Use whenever a task involves data from BOTH Atlantic and Pacific, or when
+  checking an address/token/tx across multiple chains. Do NOT use for on-chain
+  writes (use pharos-skill-engine's transaction.md), nor for single-chain
   queries (use pharos-skill-engine's query.md directly).
 version: 0.1.0
 requires:

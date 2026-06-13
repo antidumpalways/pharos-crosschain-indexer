@@ -1,6 +1,6 @@
 # Pharos Cross-Chain Indexer
 
-> **1 command. 5 chains. Real data. Zero gas.**
+> **1 command. 15 chains. Real data. Zero gas.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Pharos Atlantic](https://img.shields.io/badge/Atlantic-Testnet-7b3fe4.svg)](https://atlantic.pharosscan.xyz)
@@ -188,9 +188,19 @@ which cast || curl -L https://foundry.paradigm.xyz | bash
 |---|---|---|---|
 | **Pharos Atlantic** (testnet) | `688689` | `api.socialscan.io/pharos-atlantic-testnet` | Live |
 | **Pharos Pacific** (mainnet) | `1672` | `api.socialscan.io/pharos-mainnet` | Live |
-| Ethereum Sepolia (testnet) | `11155111` | `api-sepolia.etherscan.io` | Live |
-| Base Sepolia (testnet) | `84532` | `api-sepolia.basescan.org` | Live |
-| Arbitrum Sepolia (testnet) | `421614` | `api-sepolia.arbiscan.io` | Live |
+| Ethereum Sepolia | `11155111` | `api-sepolia.etherscan.io` | Live |
+| Optimism Sepolia | `11155420` | `api-sepolia-optimism.etherscan.io` | Live |
+| Base Sepolia | `84532` | `api-sepolia.basescan.org` | Live |
+| Arbitrum Sepolia | `421614` | `api-sepolia.arbiscan.io` | Live |
+| Polygon Amoy | `80002` | `api-amoy.polygonscan.com` | Live |
+| BSC Testnet | `97` | `api-testnet.bscscan.com` | Live |
+| Avalanche Fuji | `43113` | `api-testnet.snowtrace.io` | Live |
+| Scroll Sepolia | `534351` | `api-sepolia.scrollscan.com` | Live |
+| Linea Sepolia | `59141` | `api-sepolia.lineascan.build` | Live |
+| Blast Sepolia | `168587773` | `api-sepolia.blastscan.io` | Live |
+| Celo Alfajores | `44787` | `api-alfajores.celoscan.io` | Live |
+| Gnosis Chiado | `10200` | `gnosis-chiado.blockscout.com` | Live |
+| zkSync Sepolia | `300` | `block-explorer-api.sepolia.zksync.dev` | Live |
 
 Add any chain — edit `assets/networks.json`, add the explorer API URL, done.
 
