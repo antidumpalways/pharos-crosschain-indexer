@@ -1,0 +1,104 @@
+{
+  "$schema": "https://skills.sh/skill-registry-schema.json",
+  "name": "pharos-crosschain-indexer",
+  "version": "0.1.0",
+  "description": "Cross-chain data query skill for the Pharos AI Agent economy. 5 multi-chain read operations across 15 EVM chains. Extends pharos-skill-engine.",
+  "author": "antidumpalways",
+  "license": "MIT",
+  "repository": "https://github.com/antidumpalways/pharos-crosschain-indexer",
+  "keywords": [
+    "pharos",
+    "cross-chain",
+    "skill-engine",
+    "ai-agent",
+    "blockchain",
+    "web3",
+    "cli",
+    "data-indexer",
+    "pharosscan",
+    "evm"
+  ],
+  "activation": {
+    "triggers": [
+      "check my balance everywhere",
+      "balance on all chains",
+      "multi-chain balance",
+      "cross-chain balance",
+      "show my portfolio",
+      "all my tokens everywhere",
+      "what do I own on every chain",
+      "where is this transaction",
+      "find this tx",
+      "cross-chain tx",
+      "who is this address",
+      "label this address",
+      "is this contract verified",
+      "verify contract"
+    ]
+  },
+  "requires": {
+    "skills": ["pharos-skill-engine"],
+    "bins": ["curl", "jq"],
+    "optionalBins": ["cast"]
+  },
+  "networks": [
+    { "name": "atlantic-testnet", "chainId": 688689, "type": "pharos" },
+    { "name": "pacific-mainnet", "chainId": 1672, "type": "pharos" },
+    { "name": "ethereum-sepolia", "chainId": 11155111, "type": "etherscan" },
+    { "name": "optimism-sepolia", "chainId": 11155420, "type": "etherscan" },
+    { "name": "base-sepolia", "chainId": 84532, "type": "etherscan" },
+    { "name": "arbitrum-sepolia", "chainId": 421614, "type": "etherscan" },
+    { "name": "polygon-amoy", "chainId": 80002, "type": "etherscan" },
+    { "name": "bsc-testnet", "chainId": 97, "type": "etherscan" },
+    { "name": "avalanche-fuji", "chainId": 43113, "type": "etherscan" },
+    { "name": "scroll-sepolia", "chainId": 534351, "type": "etherscan" },
+    { "name": "linea-sepolia", "chainId": 59141, "type": "etherscan" },
+    { "name": "blast-sepolia", "chainId": 168587773, "type": "etherscan" },
+    { "name": "celo-alfajores", "chainId": 44787, "type": "etherscan" },
+    { "name": "gnosis-chiado", "chainId": 10200, "type": "blockscout" },
+    { "name": "zksync-sepolia", "chainId": 300, "type": "zksync" }
+  ],
+  "capabilities": [
+    {
+      "id": "balance",
+      "name": "Multi-Chain Balance",
+      "command": "./scripts/indexer balance <address> [chain]",
+      "description": "Query native token balance across all 15 configured chains",
+      "readOnly": true
+    },
+    {
+      "id": "tx",
+      "name": "Cross-Chain Tx Lookup",
+      "command": "./scripts/indexer tx <hash>",
+      "description": "Auto-detect which chain a transaction hash belongs to",
+      "readOnly": true
+    },
+    {
+      "id": "portfolio",
+      "name": "Portfolio Overview",
+      "command": "./scripts/indexer portfolio <address> [chain]",
+      "description": "All native + ERC-20 token balances across all chains",
+      "readOnly": true
+    },
+    {
+      "id": "label",
+      "name": "Address Label",
+      "command": "./scripts/indexer label <address>",
+      "description": "Lookup address label/identity via PharosScan + Etherscan",
+      "readOnly": true
+    },
+    {
+      "id": "verify",
+      "name": "Contract Verification",
+      "command": "./scripts/indexer verify <address>",
+      "description": "Check if contract source is verified on any explorer",
+      "readOnly": true
+    }
+  ],
+  "install": {
+    "cli": "bash <(curl -fsSL https://raw.githubusercontent.com/antidumpalways/pharos-crosschain-indexer/main/install.sh)",
+    "gh": "gh skill install antidumpalways/pharos-crosschain-indexer",
+    "npm": "npm install -g pharos-crosschain-indexer",
+    "npx": "npx pharos-crosschain-indexer"
+  }
+}
