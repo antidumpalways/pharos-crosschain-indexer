@@ -57,6 +57,13 @@ activation:
     - check on celo
     - check on gnosis
     - check on zksync
+    - add a chain
+    - configure new chain
+    - add optimism to indexer
+    - add polygon to indexer
+    - add bsc to indexer
+    - add avalanche to indexer
+    - add fantom to indexer
 requires:
   skills:
     - pharos-skill-engine
@@ -123,6 +130,7 @@ npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 | "Show my full portfolio" / "all tokens everywhere" | `pharos-indexer portfolio` | → `references/portfolio.md` |
 | "Who is this address?" / "label" / "identity" | `pharos-indexer label` | → `references/label.md` |
 | "Is this contract verified?" / "verify" | `pharos-indexer verify` | → `references/verify.md` |
+| "Add a chain" / "configure new chain" / "add <name> to indexer" | `jq` append to `assets/networks.json` | → `references/add-chain.md` |
 
 ## General Error Handling
 
