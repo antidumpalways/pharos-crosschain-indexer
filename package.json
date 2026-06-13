@@ -24,8 +24,9 @@
     "skills"
   ],
   "bin": {
-    "pharos-crosschain-indexer": "./scripts/indexer"
+    "pharos-crosschain-indexer": "./cli.mjs"
   },
+  "type": "module",
   "files": [
     "SKILL.md",
     "README.md",

@@ -1,0 +1,48 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run skill tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq jq curl
+          pip3 install --quiet pycryptodome || true
+
+      - name: Run test suite
+        run: bash test.sh
+
+      - name: Validate JSON files
+        run: |
+          python3 -m json.tool assets/networks.json > /dev/null
+          python3 -m json.tool assets/tokens.json > /dev/null
+          python3 -m json.tool skills.json > /dev/null
+          echo "All JSON files valid"
+
+      - name: Validate SKILL.md frontmatter
+        run: |
+          head -10 SKILL.md | grep -q "name:" && echo "✓ SKILL.md frontmatter OK"
+          head -10 SKILL.md | grep -q "activation:" && echo "✓ activation.triggers present"
+          head -10 SKILL.md | grep -q "requires:" && echo "✓ requires.skills declared"
+
+      - name: Check file structure matches spec
+        run: |
+          for f in SKILL.md README.md LICENSE install.sh test.sh \
+                   assets/networks.json assets/tokens.json \
+                   references/balance.md references/tx.md references/portfolio.md \
+                   references/label.md references/verify.md \
+                   scripts/indexer cli.mjs; do
+            [ -f "$f" ] || echo "MISSING: $f"
+          done
+          echo "All required files present"

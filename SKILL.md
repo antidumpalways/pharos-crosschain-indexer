@@ -118,11 +118,11 @@ npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
 | User Need | Capability | Detailed Instructions |
 |---|---|---|
-| "Check balance across all chains" / "what do I have on every chain?" | `pharos-indexer balance` | → `references/indexer.md#multi-chain-balance` |
-| "Find this transaction" / "where is this tx?" / "tx lookup" | `pharos-indexer tx` | → `references/indexer.md#cross-chain-tx-lookup` |
-| "Show my full portfolio" / "all tokens everywhere" | `pharos-indexer portfolio` | → `references/indexer.md#portfolio-overview` |
-| "Who is this address?" / "label" / "identity" | `pharos-indexer label` | → `references/indexer.md#address-label` |
-| "Is this contract verified?" / "verify" | `pharos-indexer verify` | → `references/indexer.md#contract-verification` |
+| "Check balance across all chains" / "balance everywhere" | `pharos-indexer balance` | → `references/balance.md` |
+| "Find this transaction" / "where is this tx?" | `pharos-indexer tx` | → `references/tx.md` |
+| "Show my full portfolio" / "all tokens everywhere" | `pharos-indexer portfolio` | → `references/portfolio.md` |
+| "Who is this address?" / "label" / "identity" | `pharos-indexer label` | → `references/label.md` |
+| "Is this contract verified?" / "verify" | `pharos-indexer verify` | → `references/verify.md` |
 
 ## General Error Handling
 

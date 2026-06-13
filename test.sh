@@ -38,9 +38,9 @@ echo ""
 echo "2. File structure"
 for f in SKILL.md README.md package.json install.sh LICENSE \
          assets/networks.json assets/tokens.json \
-         references/indexer.md scripts/indexer \
-         examples/crosschain-balance.sh examples/portfolio-overview.sh \
-         docs/ARCHITECTURE.md AGENTS.md SUBMISSION.md skills.json; do
+         references/balance.md references/tx.md references/portfolio.md \
+         references/label.md references/verify.md \
+         scripts/indexer cli.mjs; do
     if [ -f "$SCRIPT_DIR/$f" ]; then
         pass "$f exists"
     else
