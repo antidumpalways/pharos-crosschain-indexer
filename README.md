@@ -2,7 +2,7 @@
 
 > **1 command. 15 chains. Real data. Zero gas.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Claude Code](https://img.shields.io/badge/compatible-Claude%20Code-black.svg)](https://claude.ai) [![Cursor](https://img.shields.io/badge/compatible-Cursor-black.svg)](https://cursor.sh) [![Codex](https://img.shields.io/badge/compatible-Codex-black.svg)](https://openai.com/codex) [![Pharos Atlantic](https://img.shields.io/badge/Atlantic-Testnet-7b3fe4.svg)](https://atlantic.pharosscan.xyz) [![Pharos Pacific](https://img.shields.io/badge/Pacific-Mainnet-7b3fe4.svg)](https://www.pharosscan.xyz) [![Skill Engine](https://img.shields.io/badge/extends-pharos--skill--engine-blue.svg)](https://github.com/PharosNetwork/pharos-skill-engine)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Claude Code](https://img.shields.io/badge/compatible-Claude%20Code-black.svg)](https://claude.ai) [![Cursor](https://img.shields.io/badge/compatible-Cursor-black.svg)](https://cursor.sh) [![Codex](https://img.shields.io/badge/compatible-Codex-black.svg)](https://openai.com/codex) [![Pharos Atlantic](https://img.shields.io/badge/Atlantic-Testnet-7b3fe4.svg)](https://atlantic.pharosscan.xyz) [![Pharos Pacific](https://img.shields.io/badge/Pacific-Mainnet-7b3fe4.svg)](https://www.pharosscan.xyz) [![Skill Engine](https://img.shields.io/badge/extends-pharos--skill--engine-blue.svg)](https://github.com/PharosNetwork/pharos-skill-engine) [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows%20(WSL)-lightgrey.svg)]()
 
 Built for the **Skill-to-Agent Dual Cascade Hackathon** by Pharos x Anvita Flow. Phase 1 submission. Deadline: June 17, 2026.
 
@@ -229,6 +229,20 @@ This skill composes with every Pharos skill:
 - **`pharos-bridge-*`** — initiate a bridge to the chain where you have the most assets
 - **`pharos-x402`** — pay from the chain with the highest USDC balance
 - **`pharos-explorer`** — deep-dive a tx after cross-chain auto-detection
+
+---
+
+## Registry Submission
+
+This skill is submitted to:
+- **DoraHacks** — Skill-to-Agent Dual Cascade Hackathon (Pharos Phase 1)
+- **VoltAgent/awesome-agent-skills**
+- **agentskills/agentskills**
+- **anthropics/skills**
+
+## Pharos Agent Center
+
+Built for the Pharos Agent Center Skill Builder Campaign. https://www.pharos.xyz/agent-center
 
 ---
 

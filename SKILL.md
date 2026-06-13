@@ -137,6 +137,53 @@ npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
 **Not applicable.** All 5 operations are read-only. No wallet, no private key, no gas.
 
+---
+
+## Troubleshooting
+
+| Error | Root Cause | Fix |
+|---|---|---|
+| `jq: command not found` | `jq` not installed | `apt-get install jq` (Linux) or `brew install jq` (macOS) |
+| `curl: command not found` | `curl` not installed | `apt-get install curl` (Linux) — pre-installed on macOS |
+| `cast: command not found` | Foundry not installed | `curl -L https://foundry.paradigm.xyz \| bash && foundryup` |
+| `(unreachable)` next to a chain | RPC down or changed | Check Pharos Discord #atlantic-status; update `assets/networks.json` with current RPC URL |
+| All chains return `0` | Address has no balance on any chain | Normal for unfunded addresses. Verify address with `cast wallet address` or explorer. |
+| `No label found on any indexed chain` | Address has no public label | Normal for unlabeled addresses. Try a known labeled address like `0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045` (vitalik.eth) to verify. |
+| `Contract not verified on any indexed chain` | Contract not verified anywhere | Verify it manually via explorer, or deploy + verify via `forge verify-contract` |
+| `assets/networks.json` not found | Running from wrong directory | `cd pharos-crosschain-indexer` first |
+| Explorer API returns empty | API key missing or rate-limited | Set `EXPLORER_API_KEY` env var for Etherscan-compatible chains. PharosScan works without a key. |
+| Pacific mainnet returns `0.0 PROS` | Expected for most addresses | Most addresses don't hold PROS. Verify on https://www.pharosscan.xyz |
+| External testnet (Sepolia/Amoy/Fuji/etc) returns `0` | Address has no assets there | Normal. Most addresses only have funds on 1-2 chains. |
+
+---
+
+## Live Documentation Query
+
+Agents must query Pharos docs dynamically for any value not confirmed in this skill:
+
+```text
+GET https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain.md?ask=<question>
+GET https://docs.pharos.xyz/getting-started/network/atlantic-testnet.md?ask=<question>
+GET https://docs.pharos.xyz/getting-started/network/pacific-mainnet.md?ask=<question>
+```
+
+---
+
+## Registry Submission
+
+This skill is submitted to:
+
+- **DoraHacks** — Skill-to-Agent Dual Cascade Hackathon (Pharos Phase 1)
+- **VoltAgent/awesome-agent-skills**
+- **agentskills/agentskills**
+- **anthropics/skills**
+
+---
+
+## Pharos Agent Center
+
+This skill was built for the Pharos Agent Center Skill Builder Campaign. https://www.pharos.xyz/agent-center
+
 ## Examples
 
 ```bash
