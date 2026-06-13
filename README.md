@@ -164,15 +164,16 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 ## Install & Use
 
 ```bash
-git clone https://github.com/PharosNetwork/pharos-crosschain-indexer
+# Option A: git clone
+git clone https://github.com/antidumpalways/pharos-crosschain-indexer
 cd pharos-crosschain-indexer
+bash install.sh
 
-# One dependency: jq
-which jq || apt-get install jq       # Linux
-which jq || brew install jq          # macOS
-
-# Optional: cast (from Foundry) for faster RPC calls
-which cast || curl -L https://foundry.paradigm.xyz | bash
+# Option B: download zip (GitHub Releases)
+# Download pharos-crosschain-indexer-v0.1.0.zip
+unzip pharos-crosschain-indexer-v0.1.0.zip
+cd pharos-crosschain-indexer-v0.1.0
+bash install.sh
 
 # Start querying
 ./scripts/indexer help
