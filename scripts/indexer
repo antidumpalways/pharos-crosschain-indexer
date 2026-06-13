@@ -22,6 +22,11 @@ GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# ── globals ──────────────────────────────────────────────────────────
+
+JSON_OUTPUT=false
+QUIET_MODE=false
+
 # ── helpers ──────────────────────────────────────────────────────────
 
 die() { echo -e "${RED}ERROR:${NC} $*" >&2; exit 1; }
@@ -304,27 +309,104 @@ cmd_verify() {
     echo ""
 }
 
+# ── health ─────────────────────────────────────────────────────────────
+
+cmd_health() {
+    local filter_chain="${1:-}"
+
+    if [ "$JSON_OUTPUT" != "true" ]; then
+        echo ""
+        echo "╔══════════════════════════════════════════════════════╗"
+        echo "║  RPC Health Check — All 15 Chains                    ║"
+        echo "╚══════════════════════════════════════════════════════╝"
+        echo ""
+        printf "  %-18s %6s %8s %s\n" "Chain" "ChainID" "Status" "Block"
+    fi
+
+    local results_json="["
+    local first=true
+
+    while IFS='|' read -r chain rpc chainId nativeToken ctype; do
+        if [ -n "$filter_chain" ] && [ "$chain" != "$filter_chain" ]; then continue; fi
+
+        local resp block_num status
+        resp=$(curl -s -X POST -H "Content-Type: application/json" \
+            --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+            --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
+        block_num=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+        
+        if [ -n "$block_num" ] && [ "$block_num" != "0x0" ] && [ "$block_num" != "null" ]; then
+            local dec_block
+            dec_block=$(printf "%d" "$block_num" 2>/dev/null || echo "?")
+            status="LIVE"
+        else
+            dec_block="-"
+            status="DOWN"
+        fi
+
+        if [ "$JSON_OUTPUT" = "true" ]; then
+            [ "$first" = "false" ] && results_json+=","
+            first=false
+            results_json+="{\"chain\":\"$chain\",\"chainId\":$chainId,\"status\":\"$status\",\"block\":\"$dec_block\",\"rpc\":\"$rpc\"}"
+        else
+            if [ "$status" = "LIVE" ]; then
+                printf "  ${GREEN}%-18s${NC} %6s %8s %s\n" "$chain" "$chainId" "✓ LIVE" "$dec_block"
+            else
+                printf "  ${RED}%-18s${NC} %6s %8s %s\n" "$chain" "$chainId" "✗ DOWN" "$dec_block"
+            fi
+        fi
+    done < <(get_rpcs)
+
+    results_json+="]"
+    
+    if [ "$JSON_OUTPUT" = "true" ]; then
+        echo "$results_json" | jq .
+    else
+        echo ""
+    fi
+}
+
 # ── dispatch ──────────────────────────────────────────────────────────
 
+# Parse global flags
+ARGS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --json) JSON_OUTPUT=true; shift;;
+        --quiet|-q) QUIET_MODE=true; shift;;
+        *) ARGS+=("$1"); shift;;
+    esac
+done
+set -- "${ARGS[@]}"
+
 case "${1:-help}" in
-    balance)   shift; cmd_balance "$@";;
-    tx)        shift; cmd_tx "$@";;
-    portfolio) shift; cmd_portfolio "$@";;
-    label)     shift; cmd_label "$@";;
-    verify)    shift; cmd_verify "$@";;
+    balance|bal)   shift; cmd_balance "$@";;
+    tx|find)       shift; cmd_tx "$@";;
+    portfolio|port|pf) shift; cmd_portfolio "$@";;
+    label|lab|who) shift; cmd_label "$@";;
+    verify|ver)    shift; cmd_verify "$@";;
+    health|ping|status) shift; cmd_health "$@";;
     help|--help|-h)
-        echo "Usage: $0 <command> [args...]"
+        echo "Usage: $0 <command> [args...] [--json]"
         echo ""
         echo "Commands:"
-        echo "  balance   <address> [chain]    Multi-chain native balance"
-        echo "  tx        <tx-hash>            Cross-chain tx lookup"
-        echo "  portfolio <address> [chain]    Full token portfolio across chains"
-        echo "  label     <address>            Address label lookup"
-        echo "  verify    <address> [chain]    Contract verification check"
+        echo "  balance|bal  <address> [chain]    Multi-chain native balance"
+        echo "  tx|find      <tx-hash>            Cross-chain tx lookup"
+        echo "  portfolio|port|pf <address> [ch]  Full token portfolio across chains"
+        echo "  label|lab|who <address>           Address label lookup"
+        echo "  verify|ver   <address> [chain]    Contract verification check"
+        echo "  health|ping|status [chain]        RPC health check across all chains"
+        echo ""
+        echo "Flags:"
+        echo "  --json          Machine-readable JSON output (for agent consumption)"
+        echo "  --quiet|-q      Suppress banners and formatting"
+        echo ""
+        echo "Aliases: bal=balance, port=portfolio, lab=label, ver=verify"
         echo ""
         echo "Examples:"
-        echo "  $0 balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-        echo "  $0 portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        echo "  $0 bal 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        echo "  $0 port 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        echo "  $0 health --json"
         echo "  $0 label 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
         ;;
     *)

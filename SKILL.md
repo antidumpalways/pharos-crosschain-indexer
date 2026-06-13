@@ -64,6 +64,10 @@ activation:
     - add bsc to indexer
     - add avalanche to indexer
     - add fantom to indexer
+    - check rpc health
+    - which chains are online
+    - network status
+    - ping all chains
 requires:
   skills:
     - pharos-skill-engine
@@ -131,6 +135,7 @@ npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 | "Who is this address?" / "label" / "identity" | `pharos-indexer label` | → `references/label.md` |
 | "Is this contract verified?" / "verify" | `pharos-indexer verify` | → `references/verify.md` |
 | "Add a chain" / "configure new chain" / "add <name> to indexer" | `jq` append to `assets/networks.json` | → `references/add-chain.md` |
+| "Check RPC health" / "which chains are online" / "network status" | `pharos-indexer health` | → `references/health.md` |
 
 ## General Error Handling
 
