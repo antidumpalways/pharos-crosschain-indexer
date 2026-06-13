@@ -1,5 +1,6 @@
 ---
 name: pharos-crosschain-indexer
+version: 0.1.0
 description: >
   REQUIRED for any multi-chain data query on Pharos. This skill adds 5 cross-chain
   query capabilities on top of pharos-skill-engine: multi-chain balance lookup,
@@ -9,7 +10,53 @@ description: >
   checking an address/token/tx across multiple chains. Do NOT use for on-chain
   writes (use pharos-skill-engine's transaction.md), nor for single-chain
   queries (use pharos-skill-engine's query.md directly).
-version: 0.1.0
+authors:
+  - antidumpalways
+license: MIT
+tags:
+  - pharos
+  - cross-chain
+  - data-indexer
+  - multi-chain
+  - balance
+  - portfolio
+  - pharosscan
+  - claude-code
+  - cursor
+  - codex
+  - evm
+activation:
+  triggers:
+    - check my balance everywhere
+    - balance on all chains
+    - multi-chain balance
+    - cross-chain balance
+    - show my portfolio
+    - all my tokens everywhere
+    - what do I own on every chain
+    - what tokens do I have
+    - where is this transaction
+    - find this tx
+    - cross-chain tx
+    - who is this address
+    - label this address
+    - is this contract verified
+    - verify contract
+    - pharos atlantic balance
+    - pharos pacific balance
+    - check on sepolia
+    - check on base
+    - check on arbitrum
+    - check on optimism
+    - check on polygon
+    - check on bsc
+    - check on avalanche
+    - check on scroll
+    - check on linea
+    - check on blast
+    - check on celo
+    - check on gnosis
+    - check on zksync
 requires:
   skills:
     - pharos-skill-engine
