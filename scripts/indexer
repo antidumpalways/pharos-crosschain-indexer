@@ -1,0 +1,322 @@
+#!/usr/bin/env bash
+# scripts/indexer — Cross-chain indexer CLI for Pharos
+#
+# Usage:
+#   ./scripts/indexer balance <address> [chain]
+#   ./scripts/indexer tx <tx-hash>
+#   ./scripts/indexer portfolio <address> [chain]
+#   ./scripts/indexer label <address>
+#   ./scripts/indexer verify <address> [chain]
+#
+# Prerequisites: jq, curl, cast (from Foundry)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+NETWORKS_FILE="$ROOT_DIR/assets/networks.json"
+TOKENS_FILE="$ROOT_DIR/assets/tokens.json"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# ── helpers ──────────────────────────────────────────────────────────
+
+die() { echo -e "${RED}ERROR:${NC} $*" >&2; exit 1; }
+info() { echo -e "${CYAN}→${NC} $*"; }
+
+get_rpcs() {
+    jq -r '.networks[] | select(.rpcUrl != null and .rpcUrl != "") | "\(.name)|\(.rpcUrl)|\(.chainId)|\(.nativeToken)|\(.type)"' "$NETWORKS_FILE"
+}
+
+get_explorers() {
+    jq -r '.networks[] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
+}
+
+format_balance() {
+    # Takes wei hex, returns ether string
+    local wei_hex="$1"
+    if command -v cast >/dev/null 2>&1; then
+        echo "$wei_hex" | xargs -I{} cast --from-wei {} 2>/dev/null || echo "0"
+    else
+        # Fallback: use bc or python
+        python3 -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0"
+    fi
+}
+
+# ── balance ───────────────────────────────────────────────────────────
+
+cmd_balance() {
+    local addr="${1:-}"
+    local filter_chain="${2:-}"
+
+    if [ -z "$addr" ]; then
+        echo "Usage: $0 balance <address> [chain]"
+        echo "Example: $0 balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        exit 1
+    fi
+
+    echo ""
+    echo "╔══════════════════════════════════════════════════════╗"
+    echo "║  Multi-Chain Balance                                 ║"
+    echo "╠══════════════════════════════════════════════════════╣"
+    printf "║  Address: %-42s ║\n" "${addr:0:42}"
+    echo "╚══════════════════════════════════════════════════════╝"
+    echo ""
+
+    local found=0
+    while IFS='|' read -r chain rpc chainId nativeToken ctype; do
+        if [ -n "$filter_chain" ] && [ "$chain" != "$filter_chain" ]; then continue; fi
+
+        local result
+        if command -v cast >/dev/null 2>&1; then
+            result=$(cast balance "$addr" --rpc-url "$rpc" --ether 2>/dev/null) || true
+        else
+            # Fallback: eth_getBalance via curl
+            local resp
+            resp=$(curl -s -X POST -H "Content-Type: application/json" \
+                --data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"$addr\",\"latest\"],\"id\":1}" \
+                "$rpc" 2>/dev/null) || true
+            local wei_hex
+            wei_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+            result=$(python3 -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0")
+        fi
+
+        if [ -n "$result" ] && [ "$result" != "0" ] && [ "$result" != "0."* ] || [ "$result" = "0" ]; then
+            printf "  %-15s %12s %s\n" "$chain" "$result" "$nativeToken"
+            found=$((found + 1))
+        else
+            printf "  %-15s %12s %s  ${RED}(unreachable)${NC}\n" "$chain" "—" "$nativeToken"
+        fi
+    done < <(get_rpcs)
+
+    echo ""
+    if [ $found -eq 0 ]; then
+        echo "  No balance found on any chain for this address."
+    fi
+}
+
+# ── tx lookup ─────────────────────────────────────────────────────────
+
+cmd_tx() {
+    local txhash="${1:-}"
+
+    if [ -z "$txhash" ]; then
+        echo "Usage: $0 tx <tx-hash>"
+        echo "Example: $0 tx 0x33a1600e7caccbba921526c3fd9dc23ea5e836f7c7f77f89c0a7ef3b55fe1906"
+        exit 1
+    fi
+
+    echo ""
+    echo "╔══════════════════════════════════════════════════════╗"
+    echo "║  Cross-Chain Tx Lookup                               ║"
+    echo "╠══════════════════════════════════════════════════════╣"
+    printf "║  Tx: %-46s ║\n" "${txhash:0:46}"
+    echo "╚══════════════════════════════════════════════════════╝"
+    echo ""
+
+    local found=0
+    while IFS='|' read -r chain apiUrl explorerUrl ctype; do
+        local resp
+        if [ "$ctype" = "pharos" ] || [ "$ctype" = "etherscan" ]; then
+            resp=$(curl -s "${apiUrl}?module=transaction&action=gettxinfo&txhash=${txhash}" 2>/dev/null) || true
+        else
+            resp=$(curl -s "${apiUrl}?module=proxy&action=eth_getTransactionByHash&txhash=${txhash}" 2>/dev/null) || true
+        fi
+
+        local status
+        status=$(echo "$resp" | jq -r '.result.status // .status // "0"' 2>/dev/null)
+        if [ "$status" = "1" ] || [ "$status" = "0x1" ]; then
+            local block
+            block=$(echo "$resp" | jq -r '.result.blockNumber // "?"' 2>/dev/null)
+            echo -e "  ${GREEN}✓ Found on $chain${NC} — block ${block}"
+            echo "    Explorer: ${explorerUrl}/tx/${txhash}"
+            found=$((found + 1))
+            break
+        fi
+    done < <(get_explorers)
+
+    if [ $found -eq 0 ]; then
+        echo "  Transaction not found on any indexed chain."
+        echo "  (It may still be pending, or on a chain not in networks.json)"
+    fi
+    echo ""
+}
+
+# ── portfolio ─────────────────────────────────────────────────────────
+
+cmd_portfolio() {
+    local addr="${1:-}"
+
+    if [ -z "$addr" ]; then
+        echo "Usage: $0 portfolio <address>"
+        echo "Example: $0 portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        exit 1
+    fi
+
+    echo ""
+    echo "╔══════════════════════════════════════════════════════╗"
+    echo "║  Portfolio Overview                                  ║"
+    echo "╠══════════════════════════════════════════════════════╣"
+    printf "║  Address: %-42s ║\n" "${addr:0:42}"
+    echo "╚══════════════════════════════════════════════════════╝"
+    echo ""
+
+    printf "  %-14s %-8s %-16s %s\n" "Chain" "Token" "Balance" ""
+
+    while IFS='|' read -r chain rpc chainId nativeToken ctype; do
+        # Native balance
+        local native_bal
+        if command -v cast >/dev/null 2>&1; then
+            native_bal=$(cast balance "$addr" --rpc-url "$rpc" --ether 2>/dev/null) || native_bal="—"
+        else
+            local resp
+            resp=$(curl -s -X POST -H "Content-Type: application/json" \
+                --data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"$addr\",\"latest\"],\"id\":1}" \
+                "$rpc" 2>/dev/null) || true
+            local wei_hex
+            wei_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+            native_bal=$(python3 -c "print(round(int('$wei_hex', 16) / 1e18, 4))" 2>/dev/null || echo "0")
+        fi
+        if [ "$native_bal" != "0" ] && [ "$native_bal" != "0.0" ] && [ "$native_bal" != "—" ]; then
+            printf "  %-14s %-8s %16s\n" "$chain" "$nativeToken" "$native_bal"
+        fi
+
+        # ERC-20 tokens (from tokens.json)
+        local tokens
+        tokens=$(jq -r --arg ch "$chain" '.[$ch] // [] | .[] | "\(.symbol)|\(.address)|\(.decimals)"' "$TOKENS_FILE" 2>/dev/null) || true
+        if [ -n "$tokens" ]; then
+            while IFS='|' read -r symbol tokenAddr decimals; do
+                [ -z "$symbol" ] && continue
+                local raw
+                if command -v cast >/dev/null 2>&1; then
+                    raw=$(cast call "$tokenAddr" "balanceOf(address)(uint256)" "$addr" --rpc-url "$rpc" 2>/dev/null) || raw="0x0"
+                else
+                    raw="0x0"
+                fi
+                local bal
+                bal=$(python3 -c "print(round(int('$raw', 16) / 10**$decimals, 4))" 2>/dev/null || echo "0")
+                if [ "$bal" != "0" ] && [ "$bal" != "0.0" ]; then
+                    printf "  %-14s %-8s %16s\n" "$chain" "$symbol" "$bal"
+                fi
+            done <<< "$tokens"
+        fi
+    done < <(get_rpcs)
+
+    echo ""
+}
+
+# ── label ─────────────────────────────────────────────────────────────
+
+cmd_label() {
+    local addr="${1:-}"
+
+    if [ -z "$addr" ]; then
+        echo "Usage: $0 label <address>"
+        echo "Example: $0 label 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        exit 1
+    fi
+
+    echo ""
+    echo "╔══════════════════════════════════════════════════════╗"
+    echo "║  Address Label                                       ║"
+    echo "╠══════════════════════════════════════════════════════╣"
+    printf "║  Address: %-42s ║\n" "${addr:0:42}"
+    echo "╚══════════════════════════════════════════════════════╝"
+    echo ""
+
+    local found=0
+    while IFS='|' read -r chain apiUrl explorerUrl ctype; do
+        if [ "$ctype" = "pharos" ]; then
+            local resp
+            resp=$(curl -s "${apiUrl}/social/label/${addr}" 2>/dev/null) || true
+            local label
+            label=$(echo "$resp" | jq -r '.label // empty' 2>/dev/null)
+            if [ -n "$label" ]; then
+                local cat
+                cat=$(echo "$resp" | jq -r '.category // ""' 2>/dev/null)
+                echo -e "  ${GREEN}${label}${NC} [${cat}] — ${chain} (PharosScan social)"
+                found=$((found + 1))
+            fi
+        fi
+    done < <(get_explorers)
+
+    if [ $found -eq 0 ]; then
+        echo "  No label found on any indexed chain."
+    fi
+    echo ""
+}
+
+# ── verify ────────────────────────────────────────────────────────────
+
+cmd_verify() {
+    local addr="${1:-}"
+
+    if [ -z "$addr" ]; then
+        echo "Usage: $0 verify <contract-address>"
+        echo "Example: $0 verify 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+        exit 1
+    fi
+
+    echo ""
+    echo "╔══════════════════════════════════════════════════════╗"
+    echo "║  Contract Verification                               ║"
+    echo "╠══════════════════════════════════════════════════════╣"
+    printf "║  Address: %-42s ║\n" "${addr:0:42}"
+    echo "╚══════════════════════════════════════════════════════╝"
+    echo ""
+
+    local found=0
+    while IFS='|' read -r chain apiUrl explorerUrl ctype; do
+        local resp
+        if [ "$ctype" = "pharos" ] || [ "$ctype" = "etherscan" ]; then
+            resp=$(curl -s "${apiUrl}?module=contract&action=getsourcecode&address=${addr}" 2>/dev/null) || true
+        else
+            continue
+        fi
+        local verified
+        verified=$(echo "$resp" | jq -r '.result[0].SourceCode // empty' 2>/dev/null)
+        if [ -n "$verified" ] && [ "$verified" != "null" ] && [ "$verified" != "" ]; then
+            echo -e "  ${GREEN}✓ Verified on $chain${NC}"
+            echo "    View source: ${explorerUrl}/address/${addr}#code"
+            found=$((found + 1))
+        fi
+    done < <(get_explorers)
+
+    if [ $found -eq 0 ]; then
+        echo "  Contract not verified on any indexed chain."
+    fi
+    echo ""
+}
+
+# ── dispatch ──────────────────────────────────────────────────────────
+
+case "${1:-help}" in
+    balance)   shift; cmd_balance "$@";;
+    tx)        shift; cmd_tx "$@";;
+    portfolio) shift; cmd_portfolio "$@";;
+    label)     shift; cmd_label "$@";;
+    verify)    shift; cmd_verify "$@";;
+    help|--help|-h)
+        echo "Usage: $0 <command> [args...]"
+        echo ""
+        echo "Commands:"
+        echo "  balance   <address> [chain]    Multi-chain native balance"
+        echo "  tx        <tx-hash>            Cross-chain tx lookup"
+        echo "  portfolio <address> [chain]    Full token portfolio across chains"
+        echo "  label     <address>            Address label lookup"
+        echo "  verify    <address> [chain]    Contract verification check"
+        echo ""
+        echo "Examples:"
+        echo "  $0 balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        echo "  $0 portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        echo "  $0 label 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        ;;
+    *)
+        echo "Unknown command: $1"
+        echo "Run '$0 help' for usage."
+        exit 1
+        ;;
+esac

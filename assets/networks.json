@@ -1,0 +1,50 @@
+{
+  "networks": [
+    {
+      "name": "atlantic-testnet",
+      "rpcUrl": "https://atlantic.dplabs-internal.com",
+      "chainId": 688689,
+      "explorerUrl": "https://atlantic.pharosscan.xyz/",
+      "explorerApiUrl": "https://api.socialscan.io/pharos-atlantic-testnet",
+      "nativeToken": "PHRS",
+      "type": "pharos"
+    },
+    {
+      "name": "pacific-mainnet",
+      "rpcUrl": "https://rpc.pharos.xyz",
+      "chainId": 1672,
+      "explorerUrl": "https://www.pharosscan.xyz/",
+      "explorerApiUrl": "https://api.socialscan.io/pharos-mainnet",
+      "nativeToken": "PROS",
+      "type": "pharos"
+    },
+    {
+      "name": "ethereum-sepolia",
+      "rpcUrl": "https://ethereum-sepolia-rpc.publicnode.com",
+      "chainId": 11155111,
+      "explorerUrl": "https://sepolia.etherscan.io/",
+      "explorerApiUrl": "https://api-sepolia.etherscan.io/api",
+      "nativeToken": "ETH",
+      "type": "etherscan"
+    },
+    {
+      "name": "base-sepolia",
+      "rpcUrl": "https://sepolia.base.org",
+      "chainId": 84532,
+      "explorerUrl": "https://sepolia.basescan.org/",
+      "explorerApiUrl": "https://api-sepolia.basescan.org/api",
+      "nativeToken": "ETH",
+      "type": "etherscan"
+    },
+    {
+      "name": "arbitrum-sepolia",
+      "rpcUrl": "https://sepolia-rollup.arbitrum.io/rpc",
+      "chainId": 421614,
+      "explorerUrl": "https://sepolia.arbiscan.io/",
+      "explorerApiUrl": "https://api-sepolia.arbiscan.io/api",
+      "nativeToken": "ETH",
+      "type": "etherscan"
+    }
+  ],
+  "defaultNetwork": "atlantic-testnet"
+}
