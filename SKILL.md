@@ -68,6 +68,14 @@ activation:
     - which chains are online
     - network status
     - ping all chains
+    - compare gas prices
+    - gas across chains
+    - cheapest chain for gas
+    - gas price comparison
+    - where is my USDC
+    - rank chains by token
+    - which chain has most tokens
+    - top USDC chains
 requires:
   skills:
     - pharos-skill-engine
@@ -136,6 +144,8 @@ npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 | "Is this contract verified?" / "verify" | `pharos-indexer verify` | → `references/verify.md` |
 | "Add a chain" / "configure new chain" / "add <name> to indexer" | `jq` append to `assets/networks.json` | → `references/add-chain.md` |
 | "Check RPC health" / "which chains are online" / "network status" | `pharos-indexer health` | → `references/health.md` |
+| "Compare gas prices" / "gas across chains" / "cheapest chain" | `pharos-indexer gas` | → `references/gas.md` |
+| "Where is my USDC" / "rank chains by token" / "which chain has most" | `pharos-indexer top` | → `references/top.md` |
 
 ## General Error Handling
 

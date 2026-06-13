@@ -63,15 +63,20 @@ cmd_balance() {
         exit 1
     fi
 
-    echo ""
-    echo "╔══════════════════════════════════════════════════════╗"
-    echo "║  Multi-Chain Balance                                 ║"
-    echo "╠══════════════════════════════════════════════════════╣"
-    printf "║  Address: %-42s ║\n" "${addr:0:42}"
-    echo "╚══════════════════════════════════════════════════════╝"
-    echo ""
+    if [ "$JSON_OUTPUT" != "true" ]; then
+        echo ""
+        echo "╔══════════════════════════════════════════════════════╗"
+        echo "║  Multi-Chain Balance                                 ║"
+        echo "╠══════════════════════════════════════════════════════╣"
+        printf "║  Address: %-42s ║\n" "${addr:0:42}"
+        echo "╚══════════════════════════════════════════════════════╝"
+        echo ""
+    fi
 
     local found=0
+    local json_results="["
+    local first_json=true
+
     while IFS='|' read -r chain rpc chainId nativeToken ctype; do
         if [ -n "$filter_chain" ] && [ "$chain" != "$filter_chain" ]; then continue; fi
 
@@ -79,7 +84,6 @@ cmd_balance() {
         if command -v cast >/dev/null 2>&1; then
             result=$(cast balance "$addr" --rpc-url "$rpc" --ether 2>/dev/null) || true
         else
-            # Fallback: eth_getBalance via curl
             local resp
             resp=$(curl -s -X POST -H "Content-Type: application/json" \
                 --data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"$addr\",\"latest\"],\"id\":1}" \
@@ -90,16 +94,36 @@ cmd_balance() {
         fi
 
         if [ -n "$result" ] && [ "$result" != "" ]; then
-            printf "  %-15s %12s %s\n" "$chain" "$result" "$nativeToken"
+            if [ "$JSON_OUTPUT" = "true" ]; then
+                [ "$first_json" = "false" ] && json_results+=","
+                first_json=false
+                local status="online"
+                [ "$result" = "—" ] && status="offline"
+                json_results+="{\"chain\":\"$chain\",\"chainId\":$chainId,\"balance\":\"$result\",\"symbol\":\"$nativeToken\",\"status\":\"$status\"}"
+            else
+                printf "  %-15s %12s %s\n" "$chain" "$result" "$nativeToken"
+            fi
             found=$((found + 1))
         elif [ "$result" = "" ]; then
-            printf "  %-15s %12s %s  ${RED}(unreachable)${NC}\n" "$chain" "—" "$nativeToken"
+            if [ "$JSON_OUTPUT" = "true" ]; then
+                [ "$first_json" = "false" ] && json_results+=","
+                first_json=false
+                json_results+="{\"chain\":\"$chain\",\"chainId\":$chainId,\"balance\":\"0\",\"symbol\":\"$nativeToken\",\"status\":\"offline\"}"
+            else
+                printf "  %-15s %12s %s  ${RED}(unreachable)${NC}\n" "$chain" "—" "$nativeToken"
+            fi
         fi
     done < <(get_rpcs)
 
-    echo ""
-    if [ $found -eq 0 ]; then
-        echo "  No balance found on any chain for this address."
+    json_results+="]"
+
+    if [ "$JSON_OUTPUT" = "true" ]; then
+        echo "$json_results" | jq .
+    else
+        echo ""
+        if [ $found -eq 0 ]; then
+            echo "  No balance found on any chain for this address."
+        fi
     fi
 }
 
@@ -366,6 +390,139 @@ cmd_health() {
     fi
 }
 
+# ── gas ────────────────────────────────────────────────────────────────
+
+cmd_gas() {
+    local filter_chain="${1:-}"
+
+    if [ "$JSON_OUTPUT" != "true" ]; then
+        echo ""
+        echo "╔══════════════════════════════════════════════════════╗"
+        echo "║  Cross-Chain Gas Prices                               ║"
+        echo "╚══════════════════════════════════════════════════════╝"
+        echo ""
+        printf "  %-18s %8s %14s %s\n" "Chain" "ChainID" "Gas (gwei)" ""
+    fi
+
+    local json_results="["
+    local first_json=true
+
+    while IFS='|' read -r chain rpc chainId nativeToken ctype; do
+        if [ -n "$filter_chain" ] && [ "$chain" != "$filter_chain" ]; then continue; fi
+
+        local resp gas_hex gas_gwei
+        resp=$(curl -s -X POST -H "Content-Type: application/json" \
+            --data '{"jsonrpc":"2.0","method":"eth_gasPrice","params":[],"id":1}' \
+            --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
+        gas_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+        
+        if [ -n "$gas_hex" ] && [ "$gas_hex" != "0x0" ] && [ "$gas_hex" != "null" ]; then
+            gas_gwei=$(python3 -c "print(round(int('$gas_hex', 16) / 1e9, 2))" 2>/dev/null || echo "?")
+        else
+            gas_gwei="DOWN"
+        fi
+
+        if [ "$JSON_OUTPUT" = "true" ]; then
+            [ "$first_json" = "false" ] && json_results+=","
+            first_json=false
+            json_results+="{\"chain\":\"$chain\",\"chainId\":$chainId,\"gasGwei\":\"$gas_gwei\"}"
+        else
+            if [ "$gas_gwei" != "DOWN" ]; then
+                printf "  %-18s %8s %10s gwei\n" "$chain" "$chainId" "$gas_gwei"
+            else
+                printf "  %-18s %8s %10s ${RED}DOWN${NC}\n" "$chain" "$chainId" "—"
+            fi
+        fi
+    done < <(get_rpcs)
+
+    json_results+="]"
+
+    if [ "$JSON_OUTPUT" = "true" ]; then
+        echo "$json_results" | jq .
+    else
+        echo ""
+    fi
+}
+
+# ── top ────────────────────────────────────────────────────────────────
+
+cmd_top() {
+    local addr="${1:-}"
+    local token_symbol="${2:-USDC}"
+
+    if [ -z "$addr" ]; then
+        echo "Usage: $0 top <address> [token-symbol]"
+        echo "Example: $0 top 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 USDC"
+        echo "         $0 top 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 WETH"
+        exit 1
+    fi
+
+    if [ "$JSON_OUTPUT" != "true" ]; then
+        echo ""
+        echo "╔══════════════════════════════════════════════════════╗"
+        echo "║  Top Chains by $token_symbol Balance                 ║"
+        echo "╠══════════════════════════════════════════════════════╣"
+        printf "║  Address: %-42s ║\n" "${addr:0:42}"
+        echo "╚══════════════════════════════════════════════════════╝"
+        echo ""
+        printf "  %-18s %16s %s\n" "Chain" "Balance" ""
+    fi
+
+    # Collect all results, then sort
+    local tmpfile
+    tmpfile=$(mktemp)
+
+    while IFS='|' read -r chain rpc chainId nativeToken ctype; do
+        # Find the token address for this chain
+        local token_addr decimals
+        token_addr=$(jq -r --arg ch "$chain" --arg sym "$token_symbol" \
+            '.[$ch] // [] | .[] | select(.symbol == $sym) | .address' "$TOKENS_FILE" 2>/dev/null | head -1)
+        decimals=$(jq -r --arg ch "$chain" --arg sym "$token_symbol" \
+            '.[$ch] // [] | .[] | select(.symbol == $sym) | .decimals' "$TOKENS_FILE" 2>/dev/null | head -1)
+
+        if [ -z "$token_addr" ] || [ "$token_addr" = "null" ]; then
+            continue
+        fi
+
+        local raw bal
+        if command -v cast >/dev/null 2>&1; then
+            raw=$(cast call "$token_addr" "balanceOf(address)(uint256)" "$addr" --rpc-url "$rpc" 2>/dev/null) || raw="0x0"
+        else
+            raw="0x0"
+        fi
+        bal=$(python3 -c "print(round(int('$raw', 16) / 10**$decimals, 4))" 2>/dev/null || echo "0")
+        echo "$bal|$chain|$chainId" >> "$tmpfile"
+    done < <(get_rpcs)
+
+    local json_results="["
+    local first_json=true
+    local rank=0
+
+    while IFS='|' read -r bal_val bchain bchainId; do
+        rank=$((rank + 1))
+        if [ "$JSON_OUTPUT" = "true" ]; then
+            [ "$first_json" = "false" ] && json_results+=","
+            first_json=false
+            json_results+="{\"rank\":$rank,\"chain\":\"$bchain\",\"chainId\":$bchainId,\"balance\":\"$bal_val\",\"token\":\"$token_symbol\"}"
+        else
+            if [ "$bal_val" != "0" ] && [ "$bal_val" != "0.0" ]; then
+                printf "  ${GREEN}%-18s${NC} %16s\n" "$bchain" "$bal_val"
+            else
+                printf "  %-18s %16s\n" "$bchain" "$bal_val"
+            fi
+        fi
+    done < <(sort -t'|' -k1,1 -rn "$tmpfile")
+
+    json_results+="]"
+    rm -f "$tmpfile"
+
+    if [ "$JSON_OUTPUT" = "true" ]; then
+        echo "$json_results" | jq .
+    else
+        echo ""
+    fi
+}
+
 # ── dispatch ──────────────────────────────────────────────────────────
 
 # Parse global flags
@@ -386,6 +543,8 @@ case "${1:-help}" in
     label|lab|who) shift; cmd_label "$@";;
     verify|ver)    shift; cmd_verify "$@";;
     health|ping|status) shift; cmd_health "$@";;
+    gas|price)     shift; cmd_gas "$@";;
+    top|rank)      shift; cmd_top "$@";;
     help|--help|-h)
         echo "Usage: $0 <command> [args...] [--json]"
         echo ""
@@ -396,6 +555,8 @@ case "${1:-help}" in
         echo "  label|lab|who <address>           Address label lookup"
         echo "  verify|ver   <address> [chain]    Contract verification check"
         echo "  health|ping|status [chain]        RPC health check across all chains"
+        echo "  gas|price    [chain]              Compare gas prices across chains"
+        echo "  top|rank     <addr> [token]       Rank chains by token balance"
         echo ""
         echo "Flags:"
         echo "  --json          Machine-readable JSON output (for agent consumption)"
