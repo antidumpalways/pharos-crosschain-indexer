@@ -1,0 +1,45 @@
+{
+  "name": "pharos-crosschain-indexer",
+  "version": "0.1.0",
+  "description": "Cross-chain data query skill for the Pharos AI Agent economy. Extends pharos-skill-engine with 5 multi-chain read operations across 15 EVM chains. One command. Real data. Zero gas.",
+  "license": "MIT",
+  "author": "antidumpalways",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antidumpalways/pharos-crosschain-indexer"
+  },
+  "keywords": [
+    "pharos",
+    "cross-chain",
+    "skill-engine",
+    "ai-agent",
+    "blockchain",
+    "web3",
+    "cli",
+    "data-indexer",
+    "pharosscan",
+    "evm",
+    "claude-code",
+    "cursor",
+    "skills"
+  ],
+  "bin": {
+    "pharos-crosschain-indexer": "./scripts/indexer"
+  },
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "scripts/",
+    "assets/",
+    "references/",
+    "examples/",
+    "install.sh",
+    "VERSION"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "postinstall": "bash install.sh"
+  }
+}
