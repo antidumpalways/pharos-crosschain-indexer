@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """suggest.py - Portfolio analysis and chain recommendations."""
-import json, sys, os, subprocess, tempfile, urllib.request
+import json, sys, os, subprocess
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
@@ -13,23 +13,29 @@ if not addr:
     print("Usage: suggest <address>"); sys.exit(1)
 
 def rpc_call(rpc, method, params):
-    data = json.dumps({"jsonrpc":"2.0","method":method,"params":params,"id":1}).encode()
+    data = json.dumps({"jsonrpc":"2.0","method":method,"params":params,"id":1})
     try:
-        req = urllib.request.Request(rpc, data, {"Content-Type":"application/json"})
-        return json.loads(urllib.request.urlopen(req, timeout=10).read())
-    except: return {}
+        r = subprocess.run(["curl","-s","-X","POST","--connect-timeout","8","--max-time","15",
+            "-H","Content-Type: application/json","-d",data, rpc],
+            capture_output=True, text=True, timeout=20)
+        if r.returncode == 0 and r.stdout:
+            return json.loads(r.stdout)
+    except: pass
+    return {}
 
-def fetch_balance(rpc, address, token_type="native"):
-    if token_type == "native":
-        r = rpc_call(rpc, "eth_getBalance", [address, "latest"])
-        wei = int(r.get("result","0x0"), 16)
-        return wei / 1e18
-    return 0
+def fetch_balance(rpc, address):
+    r = rpc_call(rpc, "eth_getBalance", [address, "latest"])
+    wei = r.get("result","0x0")
+    if not wei or wei == "0x0": return 0
+    try: return int(wei, 16) / 1e18
+    except: return 0
 
 def fetch_gas(rpc):
     r = rpc_call(rpc, "eth_gasPrice", [])
-    wei = int(r.get("result","0x0"), 16)
-    return round(wei / 1e9, 2)
+    wei = r.get("result","0x0")
+    if not wei or wei == "0x0": return -1
+    try: return round(int(wei, 16) / 1e9, 2)
+    except: return -1
 
 print("="*57)
 print("|  Portfolio Suggestions                                    |")
@@ -73,12 +79,14 @@ chains.sort(key=lambda c: c["gas"])
 # Suggestions
 count = 0
 
-# 1. Gas prices - ALL chains (top 15)
-cheapest = chains[0]
-print("  [GAS] Gas prices across chains (cheapest first):")
-for c in chains[:15]:
+# 1. Gas prices - ALL chains
+cheapest = [c for c in chains if c["gas"] >= 0]
+if cheapest: cheapest = cheapest[0]
+print("  [GAS] Gas prices across chains:")
+for c in chains:
     marker = " <<< CHEAPEST" if c == cheapest else ""
-    print(f"    {c['name']:<22s} {c['gas']:>8.2f} gwei{marker}")
+    gas_str = f"{c['gas']:.2f} gwei" if c["gas"] >= 0 else "N/A"
+    print(f"    {c['name']:<22s} {gas_str:>12s}{marker}")
 count += 1
 
 # 2. Where you have native balance
@@ -96,12 +104,15 @@ else:
 
 # 3. Bridge recommendation
 rich = sorted(has_balance, key=lambda c: c["balance"], reverse=True)
-if rich and cheapest["name"] != rich[0]["name"]:
+if rich and cheapest and cheapest["name"] != rich[0]["name"]:
+    src = rich[0]
+    src_gas = f"{src['gas']:.2f} gwei" if src["gas"] >= 0 else "N/A"
+    dst_gas = f"{cheapest['gas']:.2f} gwei" if cheapest["gas"] >= 0 else "N/A"
     print()
-    print(f"  [BRIDGE] You have {rich[0]['balance']:.4f} {rich[0]['token']} on {rich[0]['name']}")
-    print(f"           Gas on {rich[0]['name']}: {rich[0]['gas']} gwei")
-    print(f"           Gas on {cheapest['name']}: {cheapest['gas']} gwei")
-    if cheapest["gas"] < rich[0]["gas"]:
+    print(f"  [BRIDGE] You have {src['balance']:.4f} {src['token']} on {src['name']}")
+    print(f"           Gas on {src['name']}: {src_gas}")
+    print(f"           Gas on {cheapest['name']}: {dst_gas}")
+    if cheapest["gas"] >= 0 and src["gas"] >= 0 and cheapest["gas"] < src["gas"]:
         print(f"  -> Consider bridging to {cheapest['name']} for cheaper tx")
     count += 1
 
