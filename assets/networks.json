@@ -847,6 +847,86 @@
       "chainId": 999,
       "nativeToken": "HYPE",
       "type": "etherscan"
+    },
+    {
+      "name": "bitcoin",
+      "rpcUrl": "https://blockchain.info/q/addressbalance",
+      "chainId": 0,
+      "explorerUrl": "https://www.blockchain.com/explorer",
+      "nativeToken": "BTC",
+      "type": "bitcoin"
+    },
+    {
+      "name": "tron",
+      "rpcUrl": "https://apilist.tronscanapi.com/api/accountv2",
+      "chainId": 728126428,
+      "explorerUrl": "https://tronscan.org/",
+      "nativeToken": "TRX",
+      "type": "tron"
+    },
+    {
+      "name": "filecoin",
+      "rpcUrl": "https://filecoin.drpc.org",
+      "chainId": 314,
+      "explorerUrl": "https://filfox.info/",
+      "nativeToken": "FIL",
+      "type": "filecoin"
+    },
+    {
+      "name": "near",
+      "rpcUrl": "https://api.nearblocks.io/v1/account",
+      "chainId": 0,
+      "explorerUrl": "https://nearblocks.io/",
+      "nativeToken": "NEAR",
+      "type": "near"
+    },
+    {
+      "name": "cosmos",
+      "rpcUrl": "https://cosmos-rest.publicnode.com/cosmos/bank/v1beta1/balances",
+      "chainId": 0,
+      "explorerUrl": "https://www.mintscan.io/cosmos",
+      "nativeToken": "ATOM",
+      "type": "cosmos"
+    },
+    {
+      "name": "ripple",
+      "rpcUrl": "https://s1.ripple.com:51234",
+      "chainId": 0,
+      "explorerUrl": "https://livenet.xrpl.org/",
+      "nativeToken": "XRP",
+      "type": "ripple"
+    },
+    {
+      "name": "dogecoin",
+      "rpcUrl": "https://dogechain.info/api/v1/address/balance",
+      "chainId": 0,
+      "explorerUrl": "https://dogechain.info/",
+      "nativeToken": "DOGE",
+      "type": "dogecoin"
+    },
+    {
+      "name": "solana",
+      "rpcUrl": "https://api.mainnet-beta.solana.com",
+      "chainId": 0,
+      "explorerUrl": "https://solscan.io/",
+      "nativeToken": "SOL",
+      "type": "solana"
+    },
+    {
+      "name": "polkadot",
+      "rpcUrl": "https://polkadot.api.subscan.io/api/scan/account",
+      "chainId": 0,
+      "explorerUrl": "https://polkadot.subscan.io/",
+      "nativeToken": "DOT",
+      "type": "polkadot"
+    },
+    {
+      "name": "ton",
+      "rpcUrl": "https://toncenter.com/api/v2/getAddressInformation",
+      "chainId": 0,
+      "explorerUrl": "https://tonscan.org/",
+      "nativeToken": "TON",
+      "type": "ton"
     }
   ],
   "defaultNetwork": "atlantic-testnet"
