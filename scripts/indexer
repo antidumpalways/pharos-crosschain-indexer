@@ -27,6 +27,7 @@ NC='\033[0m'
 JSON_OUTPUT=false
 QUIET_MODE=false
 USD_MODE=false
+CSV_MODE=false
 PRICE_CACHE_FILE="/tmp/pharos_indexer_prices"
 
 # Ã¢â€â‚¬Ã¢â€â‚¬ helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
@@ -584,6 +585,135 @@ cmd_top() {
     fi
 }
 
+# Ã¢â€â‚¬Ã¢â€â‚¬ suggest Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+
+cmd_suggest() {
+    local addr="${1:-}"
+    if [ -z "$addr" ]; then
+        echo "Usage: $0 suggest <address>"; exit 1
+    fi
+
+    echo ""
+    echo "========================================================="
+    echo "|  Portfolio Suggestions                                 |"
+    echo "+---------------------------------------------------------+"
+    printf "|  Address: %-42s  |\n" "${addr:0:42}"
+    echo "========================================================="
+    echo ""
+
+    # 1. Collect token balances across all chains
+    local tmpfile; tmpfile=$(mktemp)
+    while IFS='|' read -r chain rpc chainId nativeToken ctype; do
+        if [ "$ctype" = "solana" ]; then continue; fi
+
+        local native_bal=0
+        if command -v cast >/dev/null 2>&1; then
+            native_bal=$(cast balance "$addr" --rpc-url "$rpc" --ether 2>/dev/null) || native_bal=0
+        else
+            local resp
+            resp=$(curl -s -X POST -H "Content-Type: application/json" \
+                --data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"$addr\",\"latest\"],\"id\":1}" \
+                --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
+            local wei_hex
+            wei_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+            native_bal=$(python3 -c "print(round(int('$wei_hex', 16) / 1e18, 6))" 2>/dev/null || echo "0")
+        fi
+        echo "NATIVE|$chain|$nativeToken|$native_bal|$chainId|$rpc" >> "$tmpfile"
+
+        # Check USDC for this chain
+        local usdc_addr
+        usdc_addr=$(jq -r --arg ch "$chain" '.[$ch] // [] | .[] | select(.symbol == "USDC") | .address' "$TOKENS_FILE" 2>/dev/null | head -1)
+        if [ -n "$usdc_addr" ] && [ "$usdc_addr" != "null" ]; then
+            local raw
+            if command -v cast >/dev/null 2>&1; then
+                raw=$(cast call "$usdc_addr" "balanceOf(address)(uint256)" "$addr" --rpc-url "$rpc" 2>/dev/null) || raw="0x0"
+            else
+                raw="0x0"
+            fi
+            local bal
+            bal=$(python3 -c "print(round(int('$raw', 16) / 1e6, 4))" 2>/dev/null || echo "0")
+            echo "USDC|$chain|$bal|$rpc" >> "$tmpfile"
+        fi
+    done < <(get_rpcs)
+
+    # 2. Check gas prices across chains
+    local gas_file; gas_file=$(mktemp)
+    while IFS='|' read -r chain rpc chainId nativeToken ctype; do
+        if [ "$ctype" = "solana" ]; then continue; fi
+        local resp gas_hex gas_gwei
+        resp=$(curl -s -X POST -H "Content-Type: application/json" \
+            --data '{"jsonrpc":"2.0","method":"eth_gasPrice","params":[],"id":1}' \
+            --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
+        gas_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+        if [ -n "$gas_hex" ] && [ "$gas_hex" != "0x0" ]; then
+            local gwei
+            gwei=$(python3 -c "print(round(int('$gas_hex', 16) / 1e9, 2))" 2>/dev/null || echo "999")
+            echo "$gwei|$chain|$rpc" >> "$gas_file"
+        fi
+    done < <(get_rpcs)
+
+    # 3. Generate suggestions
+    local suggestions=0
+
+    # Suggestion A: Where to bridge from
+    local best_usdc_chain best_usdc_bal=0
+    while IFS='|' read -r token chain bal rpc; do
+        [ "$token" != "USDC" ] && continue
+        local is_gt; is_gt=$(python3 -c "print(1 if float($bal) > float($best_usdc_bal) else 0)" 2>/dev/null || echo "0")
+        if [ "$is_gt" = "1" ]; then
+            best_usdc_chain="$chain"; best_usdc_bal="$bal"
+        fi
+    done < "$tmpfile"
+
+    if [ "$best_usdc_bal" != "0" ] && [ "$best_usdc_bal" != "0.0" ]; then
+        echo "  [BRIDGE] You have $best_usdc_bal USDC on $best_usdc_chain."
+        # Find cheapest gas chain to bridge to
+        local cheapest_gas_chain cheapest_gas=999
+        while IFS='|' read -r gwei chain rpc; do
+            local is_lt; is_lt=$(python3 -c "print(1 if float($gwei) < float($cheapest_gas) else 0)" 2>/dev/null || echo "0")
+            if [ "$is_lt" = "1" ] && [ "$chain" != "$best_usdc_chain" ]; then
+                cheapest_gas="$gwei"; cheapest_gas_chain="$chain"
+            fi
+        done < <(sort -t'|' -k1,1 -n "$gas_file")
+        if [ -n "$cheapest_gas_chain" ] && [ "$cheapest_gas_chain" != "$best_usdc_chain" ]; then
+            echo "  -> Bridge to $cheapest_gas_chain (${cheapest_gas} gwei vs $best_usdc_chain gas)"
+        fi
+        echo ""
+        suggestions=$((suggestions + 1))
+    fi
+
+    # Suggestion B: Cheapest chain for transactions
+    local cheapest; cheapest=$(sort -t'|' -k1,1 -n "$gas_file" | head -1)
+    local cheap_gwei cheap_chain; cheap_chain=$(echo "$cheapest" | cut -d'|' -f2); cheap_gwei=$(echo "$cheapest" | cut -d'|' -f1)
+    echo "  [GAS] Cheapest chain for transactions: $cheap_chain at ${cheap_gwei} gwei"
+    suggestions=$((suggestions + 1))
+
+    # Suggestion C: Where to deploy contracts (lowest gas)
+    local deploy_chain=$(sort -t'|' -k1,1 -n "$gas_file" | head -3 | tail -1 | cut -d'|' -f2)
+    local deploy_gwei=$(sort -t'|' -k1,1 -n "$gas_file" | head -3 | tail -1 | cut -d'|' -f1)
+    echo "  [DEPLOY] Best chain to deploy contracts: $deploy_chain (${deploy_gwei} gwei)"
+    suggestions=$((suggestions + 1))
+
+    # Suggestion D: Where you have gas to pay
+    echo ""
+    echo "  [GAS BALANCE] Chains where you can pay for tx:"
+    local gas_found=0
+    while IFS='|' read -r type chain token bal cid rpc; do
+        [ "$type" != "NATIVE" ] && continue
+        local is_gt; is_gt=$(python3 -c "print(1 if float($bal) > 0 else 0)" 2>/dev/null || echo "0")
+        if [ "$is_gt" = "1" ]; then
+            printf "    %-18s %12s %s\n" "$chain" "$bal" "$token"
+            gas_found=$((gas_found + 1))
+        fi
+    done < "$tmpfile"
+    [ "$gas_found" -eq 0 ] && echo "    (none — fund a wallet first)"
+
+    echo ""
+    echo "  $suggestions suggestions generated."
+
+    rm -f "$tmpfile" "$gas_file"
+}"
+
 # Ã¢â€â‚¬Ã¢â€â‚¬ dispatch Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 # Parse global flags
@@ -591,6 +721,7 @@ ARGS=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --json) JSON_OUTPUT=true; shift;;
+        --csv)  CSV_MODE=true; JSON_OUTPUT=true; shift;;
         --usd|--dollar) USD_MODE=true; shift;;
         --quiet|-q) QUIET_MODE=true; shift;;
         *) ARGS+=("$1"); shift;;
@@ -607,6 +738,7 @@ case "${1:-help}" in
     health|ping|status) shift; cmd_health "$@";;
     gas|price)     shift; cmd_gas "$@";;
     top|rank)      shift; cmd_top "$@";;
+    suggest|rec)   shift; cmd_suggest "$@";;
     help|--help|-h)
         echo "Usage: $0 <command> [args...] [--json]"
         echo ""
