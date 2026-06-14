@@ -201,7 +201,7 @@ cmd_balance() {
             if [ "$usd_price" != "N/A" ] && [ -n "$usd_price" ]; then
                 local usd_val
                 usd_val=$(python3 -c "print(round(float($result) * float($usd_price), 2))" 2>/dev/null || echo "N/A")
-                usd_str=" (\$$usd_val)"
+                usd_str=$(printf ' ($%.2f)' "$usd_val")
             fi
         fi
 
@@ -222,9 +222,9 @@ cmd_balance() {
             if [ "$JSON_OUTPUT" = "true" ]; then
                 [ "$first_json" = "false" ] && json_results+=","
                 first_json=false
-                json_results+="{\"chain\":\"$chain\",\"chainId\":$chainId,\"balance\":\"0\",\"symbol\":\"$nativeToken\",\"status\":\"offline\"}
+                json_results+="{\"chain\":\"$chain\",\"chainId\":$chainId,\"balance\":\"0\",\"symbol\":\"$nativeToken\",\"status\":\"offline\"}"
             else
-                printf "  %-15s %12s %s  ${RED}(unreachable)${NC}\n" "$chain" "--" "$nativeToken"
+                printf '%s' "  ${RED}${chain}${NC}"; printf '%12s %s\n' "--" "$nativeToken"
             fi
         fi
     done < <(get_rpcs)
