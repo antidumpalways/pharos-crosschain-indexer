@@ -6,8 +6,7 @@
       "chainId": 688689,
       "explorerUrl": "https://atlantic.pharosscan.xyz/",
       "explorerApiUrl": "https://api.socialscan.io/pharos-atlantic-testnet",
-      "nativeToken": "PHRS",
-      "type": "pharos"
+      "nativeToken": "PHRS", "type": "pharos"
     },
     {
       "name": "pacific-mainnet",
@@ -15,8 +14,7 @@
       "chainId": 1672,
       "explorerUrl": "https://www.pharosscan.xyz/",
       "explorerApiUrl": "https://api.socialscan.io/pharos-mainnet",
-      "nativeToken": "PROS",
-      "type": "pharos"
+      "nativeToken": "PROS", "type": "pharos"
     },
     {
       "name": "ethereum-sepolia",
@@ -24,8 +22,7 @@
       "chainId": 11155111,
       "explorerUrl": "https://sepolia.etherscan.io/",
       "explorerApiUrl": "https://api-sepolia.etherscan.io/api",
-      "nativeToken": "ETH",
-      "type": "etherscan"
+      "nativeToken": "ETH", "type": "etherscan"
     },
     {
       "name": "optimism-sepolia",
@@ -33,8 +30,7 @@
       "chainId": 11155420,
       "explorerUrl": "https://sepolia-optimism.etherscan.io/",
       "explorerApiUrl": "https://api-sepolia-optimism.etherscan.io/api",
-      "nativeToken": "ETH",
-      "type": "etherscan"
+      "nativeToken": "ETH", "type": "etherscan"
     },
     {
       "name": "base-sepolia",
@@ -42,8 +38,7 @@
       "chainId": 84532,
       "explorerUrl": "https://sepolia.basescan.org/",
       "explorerApiUrl": "https://api-sepolia.basescan.org/api",
-      "nativeToken": "ETH",
-      "type": "etherscan"
+      "nativeToken": "ETH", "type": "etherscan"
     },
     {
       "name": "arbitrum-sepolia",
@@ -51,8 +46,7 @@
       "chainId": 421614,
       "explorerUrl": "https://sepolia.arbiscan.io/",
       "explorerApiUrl": "https://api-sepolia.arbiscan.io/api",
-      "nativeToken": "ETH",
-      "type": "etherscan"
+      "nativeToken": "ETH", "type": "etherscan"
     },
     {
       "name": "polygon-amoy",
@@ -60,8 +54,7 @@
       "chainId": 80002,
       "explorerUrl": "https://amoy.polygonscan.com/",
       "explorerApiUrl": "https://api-amoy.polygonscan.com/api",
-      "nativeToken": "POL",
-      "type": "etherscan"
+      "nativeToken": "POL", "type": "etherscan"
     },
     {
       "name": "bsc-testnet",
@@ -69,8 +62,7 @@
       "chainId": 97,
       "explorerUrl": "https://testnet.bscscan.com/",
       "explorerApiUrl": "https://api-testnet.bscscan.com/api",
-      "nativeToken": "BNB",
-      "type": "etherscan"
+      "nativeToken": "BNB", "type": "etherscan"
     },
     {
       "name": "avalanche-fuji",
@@ -78,8 +70,7 @@
       "chainId": 43113,
       "explorerUrl": "https://testnet.snowtrace.io/",
       "explorerApiUrl": "https://api-testnet.snowtrace.io/api",
-      "nativeToken": "AVAX",
-      "type": "etherscan"
+      "nativeToken": "AVAX", "type": "etherscan"
     },
     {
       "name": "scroll-sepolia",
@@ -87,8 +78,7 @@
       "chainId": 534351,
       "explorerUrl": "https://sepolia.scrollscan.com/",
       "explorerApiUrl": "https://api-sepolia.scrollscan.com/api",
-      "nativeToken": "ETH",
-      "type": "etherscan"
+      "nativeToken": "ETH", "type": "etherscan"
     },
     {
       "name": "linea-sepolia",
@@ -96,8 +86,7 @@
       "chainId": 59141,
       "explorerUrl": "https://sepolia.lineascan.build/",
       "explorerApiUrl": "https://api-sepolia.lineascan.build/api",
-      "nativeToken": "ETH",
-      "type": "etherscan"
+      "nativeToken": "ETH", "type": "etherscan"
     },
     {
       "name": "blast-sepolia",
@@ -105,8 +94,7 @@
       "chainId": 168587773,
       "explorerUrl": "https://sepolia.blastscan.io/",
       "explorerApiUrl": "https://api-sepolia.blastscan.io/api",
-      "nativeToken": "ETH",
-      "type": "etherscan"
+      "nativeToken": "ETH", "type": "etherscan"
     },
     {
       "name": "celo-alfajores",
@@ -114,8 +102,7 @@
       "chainId": 44787,
       "explorerUrl": "https://alfajores.celoscan.io/",
       "explorerApiUrl": "https://api-alfajores.celoscan.io/api",
-      "nativeToken": "CELO",
-      "type": "etherscan"
+      "nativeToken": "CELO", "type": "etherscan"
     },
     {
       "name": "gnosis-chiado",
@@ -123,8 +110,7 @@
       "chainId": 10200,
       "explorerUrl": "https://gnosis-chiado.blockscout.com/",
       "explorerApiUrl": "https://gnosis-chiado.blockscout.com/api",
-      "nativeToken": "XDAI",
-      "type": "blockscout"
+      "nativeToken": "XDAI", "type": "blockscout"
     },
     {
       "name": "zksync-sepolia",
@@ -132,8 +118,129 @@
       "chainId": 300,
       "explorerUrl": "https://sepolia.explorer.zksync.io/",
       "explorerApiUrl": "https://block-explorer-api.sepolia.zksync.dev/api",
-      "nativeToken": "ETH",
-      "type": "zksync"
+      "nativeToken": "ETH", "type": "zksync"
+    },
+
+    {
+      "name": "ethereum",
+      "rpcUrl": "https://eth.llamarpc.com",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io/",
+      "explorerApiUrl": "https://api.etherscan.io/api",
+      "nativeToken": "ETH", "type": "etherscan"
+    },
+    {
+      "name": "optimism",
+      "rpcUrl": "https://mainnet.optimism.io",
+      "chainId": 10,
+      "explorerUrl": "https://optimistic.etherscan.io/",
+      "explorerApiUrl": "https://api-optimistic.etherscan.io/api",
+      "nativeToken": "ETH", "type": "etherscan"
+    },
+    {
+      "name": "base",
+      "rpcUrl": "https://mainnet.base.org",
+      "chainId": 8453,
+      "explorerUrl": "https://basescan.org/",
+      "explorerApiUrl": "https://api.basescan.org/api",
+      "nativeToken": "ETH", "type": "etherscan"
+    },
+    {
+      "name": "arbitrum",
+      "rpcUrl": "https://arb1.arbitrum.io/rpc",
+      "chainId": 42161,
+      "explorerUrl": "https://arbiscan.io/",
+      "explorerApiUrl": "https://api.arbiscan.io/api",
+      "nativeToken": "ETH", "type": "etherscan"
+    },
+    {
+      "name": "polygon",
+      "rpcUrl": "https://polygon-rpc.com",
+      "chainId": 137,
+      "explorerUrl": "https://polygonscan.com/",
+      "explorerApiUrl": "https://api.polygonscan.com/api",
+      "nativeToken": "POL", "type": "etherscan"
+    },
+    {
+      "name": "bsc",
+      "rpcUrl": "https://bsc-dataseed.bnbchain.org",
+      "chainId": 56,
+      "explorerUrl": "https://bscscan.com/",
+      "explorerApiUrl": "https://api.bscscan.com/api",
+      "nativeToken": "BNB", "type": "etherscan"
+    },
+    {
+      "name": "avalanche",
+      "rpcUrl": "https://api.avax.network/ext/bc/C/rpc",
+      "chainId": 43114,
+      "explorerUrl": "https://snowtrace.io/",
+      "explorerApiUrl": "https://api.snowtrace.io/api",
+      "nativeToken": "AVAX", "type": "etherscan"
+    },
+    {
+      "name": "fantom",
+      "rpcUrl": "https://rpcapi.fantom.network",
+      "chainId": 250,
+      "explorerUrl": "https://ftmscan.com/",
+      "explorerApiUrl": "https://api.ftmscan.com/api",
+      "nativeToken": "FTM", "type": "etherscan"
+    },
+    {
+      "name": "gnosis",
+      "rpcUrl": "https://rpc.gnosischain.com",
+      "chainId": 100,
+      "explorerUrl": "https://gnosisscan.io/",
+      "explorerApiUrl": "https://api.gnosisscan.io/api",
+      "nativeToken": "XDAI", "type": "etherscan"
+    },
+    {
+      "name": "celo",
+      "rpcUrl": "https://forno.celo.org",
+      "chainId": 42220,
+      "explorerUrl": "https://celoscan.io/",
+      "explorerApiUrl": "https://api.celoscan.io/api",
+      "nativeToken": "CELO", "type": "etherscan"
+    },
+    {
+      "name": "scroll",
+      "rpcUrl": "https://rpc.scroll.io",
+      "chainId": 534352,
+      "explorerUrl": "https://scrollscan.com/",
+      "explorerApiUrl": "https://api.scrollscan.com/api",
+      "nativeToken": "ETH", "type": "etherscan"
+    },
+    {
+      "name": "linea",
+      "rpcUrl": "https://rpc.linea.build",
+      "chainId": 59144,
+      "explorerUrl": "https://lineascan.build/",
+      "explorerApiUrl": "https://api.lineascan.build/api",
+      "nativeToken": "ETH", "type": "etherscan"
+    },
+    {
+      "name": "blast",
+      "rpcUrl": "https://rpc.blast.io",
+      "chainId": 81457,
+      "explorerUrl": "https://blastscan.io/",
+      "explorerApiUrl": "https://api.blastscan.io/api",
+      "nativeToken": "ETH", "type": "etherscan"
+    },
+    {
+      "name": "moonbeam",
+      "rpcUrl": "https://rpc.api.moonbeam.network",
+      "chainId": 1284,
+      "explorerUrl": "https://moonscan.io/",
+      "explorerApiUrl": "https://api-moonbeam.moonscan.io/api",
+      "nativeToken": "GLMR", "type": "etherscan"
+    },
+    {
+      "name": "solana",
+      "rpcUrl": "https://api.mainnet-beta.solana.com",
+      "chainId": 0,
+      "explorerUrl": "https://solscan.io/",
+      "explorerApiUrl": "",
+      "nativeToken": "SOL",
+      "type": "solana"
     }
   ],
   "defaultNetwork": "atlantic-testnet"

@@ -1,0 +1,18 @@
+{
+  "description": "CoinGecko IDs for native tokens. Used by --usd flag to convert balances to USD.",
+  "source": "https://api.coingecko.com/api/v3/simple/price",
+  "tokens": {
+    "ETH": "ethereum",
+    "POL": "matic-network",
+    "BNB": "binancecoin",
+    "AVAX": "avalanche-2",
+    "FTM": "fantom",
+    "XDAI": "dai",
+    "CELO": "celo",
+    "SOL": "solana",
+    "GLMR": "moonbeam",
+    "PHRS": null,
+    "PROS": null
+  },
+  "note": "PHRS and PROS are Pharos-native tokens with no public USD feed yet. Set to null — USD conversion skipped for these."
+}

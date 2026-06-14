@@ -26,6 +26,8 @@ NC='\033[0m'
 
 JSON_OUTPUT=false
 QUIET_MODE=false
+USD_MODE=false
+PRICE_CACHE_FILE="/tmp/pharos_indexer_prices"
 
 # Ã¢â€â‚¬Ã¢â€â‚¬ helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
@@ -38,6 +40,36 @@ get_rpcs() {
 
 get_explorers() {
     jq -r '.networks[] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
+}
+
+# USD price conversion via CoinGecko
+get_usd_price() {
+    local symbol="$1"
+    local cg_id
+    cg_id=$(jq -r --arg sym "$symbol" '.tokens[$sym] // "null"' "$ROOT_DIR/assets/priceFeeds.json" 2>/dev/null)
+    if [ "$cg_id" = "null" ] || [ -z "$cg_id" ]; then
+        echo "N/A"
+        return
+    fi
+    # Check cache (valid for 5 min)
+    local cache_time cache_val
+    if [ -f "$PRICE_CACHE_FILE" ]; then
+        cache_val=$(grep "^${symbol}=" "$PRICE_CACHE_FILE" 2>/dev/null | cut -d= -f2 | cut -d'|' -f1) || ""
+        cache_time=$(grep "^${symbol}=" "$PRICE_CACHE_FILE" 2>/dev/null | cut -d= -f2 | cut -d'|' -f2) || "0"
+        local now; now=$(date +%s)
+        if [ -n "$cache_val" ] && [ "$now" -lt "$((cache_time + 300))" ] 2>/dev/null; then
+            echo "$cache_val"
+            return
+        fi
+    fi
+    # Fetch from CoinGecko
+    local resp price
+    resp=$(curl -s --connect-timeout 10 --max-time 15 \
+        "https://api.coingecko.com/api/v3/simple/price?ids=${cg_id}&vs_currencies=usd" 2>/dev/null) || true
+    price=$(echo "$resp" | jq -r --arg id "$cg_id" '.[$id].usd // "N/A"' 2>/dev/null)
+    # Cache
+    echo "${symbol}=${price}|$(date +%s)" >> "$PRICE_CACHE_FILE"
+    echo "$price"
 }
 
 format_balance() {
@@ -81,7 +113,20 @@ cmd_balance() {
         if [ -n "$filter_chain" ] && [ "$chain" != "$filter_chain" ]; then continue; fi
 
         local result
-        if command -v cast >/dev/null 2>&1; then
+        if [ "$ctype" = "solana" ]; then
+            # Solana: use getBalance JSON-RPC (value in lamports, 1 SOL = 1e9 lamports)
+            local sol_resp
+            sol_resp=$(curl -s -X POST -H "Content-Type: application/json" \
+                --data "{\"jsonrpc\":\"2.0\",\"method\":\"getBalance\",\"params\":[\"$addr\"],\"id\":1}" \
+                --connect-timeout 10 --max-time 15 "$rpc" 2>/dev/null) || true
+            local sol_value
+            sol_value=$(echo "$sol_resp" | jq -r '.result.value // -1' 2>/dev/null)
+            if [ "$sol_value" != "-1" ] && [ -n "$sol_value" ]; then
+                result=$(python3 -c "print(round(int($sol_value) / 1e9, 6))" 2>/dev/null || echo "0")
+            else
+                result=""
+            fi
+        elif command -v cast >/dev/null 2>&1; then
             result=$(cast balance "$addr" --rpc-url "$rpc" --ether 2>/dev/null) || true
         else
             local resp
@@ -93,15 +138,29 @@ cmd_balance() {
             result=$(python3 -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0")
         fi
 
+        # USD conversion
+        local usd_str=""
+        if [ "$USD_MODE" = "true" ] && [ -n "$result" ] && [ "$result" != "" ]; then
+            local usd_price
+            usd_price=$(get_usd_price "$nativeToken")
+            if [ "$usd_price" != "N/A" ] && [ -n "$usd_price" ]; then
+                local usd_val
+                usd_val=$(python3 -c "print(round(float($result) * float($usd_price), 2))" 2>/dev/null || echo "N/A")
+                usd_str=" (\$$usd_val)"
+            fi
+        fi
+
         if [ -n "$result" ] && [ "$result" != "" ]; then
             if [ "$JSON_OUTPUT" = "true" ]; then
                 [ "$first_json" = "false" ] && json_results+=","
                 first_json=false
                 local status="online"
-                [ "$result" = "Ã¢â‚¬â€" ] && status="offline"
                 json_results+="{\"chain\":\"$chain\",\"chainId\":$chainId,\"balance\":\"$result\",\"symbol\":\"$nativeToken\",\"status\":\"$status\"}"
+                if [ "$USD_MODE" = "true" ] && [ -n "$usd_str" ]; then
+                    json_results="${json_results::-1},\"usd\":\"${usd_str//[()\$ ]/}\"}"
+                fi
             else
-                printf "  %-15s %12s %s\n" "$chain" "$result" "$nativeToken"
+                printf "  %-15s %12s %s%s\n" "$chain" "$result" "$nativeToken" "$usd_str"
             fi
             found=$((found + 1))
         elif [ "$result" = "" ]; then
@@ -530,6 +589,7 @@ ARGS=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --json) JSON_OUTPUT=true; shift;;
+        --usd|--dollar) USD_MODE=true; shift;;
         --quiet|-q) QUIET_MODE=true; shift;;
         *) ARGS+=("$1"); shift;;
     esac
@@ -560,6 +620,7 @@ case "${1:-help}" in
         echo ""
         echo "Flags:"
         echo "  --json          Machine-readable JSON output (for agent consumption)"
+        echo "  --usd|--dollar  Show estimated USD value alongside balances"
         echo "  --quiet|-q      Suppress banners and formatting"
         echo ""
         echo "Aliases: bal=balance, port=portfolio, lab=label, ver=verify"
