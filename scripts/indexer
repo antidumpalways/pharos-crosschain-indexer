@@ -42,34 +42,48 @@ get_explorers() {
     jq -r '.networks[] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
 }
 
-# USD price conversion via CoinGecko
+# USD price conversion via CoinGecko + fallback
 get_usd_price() {
     local symbol="$1"
-    local cg_id
-    cg_id=$(jq -r --arg sym "$symbol" '.tokens[$sym] // "null"' "$ROOT_DIR/assets/priceFeeds.json" 2>/dev/null)
-    if [ "$cg_id" = "null" ] || [ -z "$cg_id" ]; then
-        echo "N/A"
-        return
+    local cg_id fallback
+    cg_id=$(jq -r --arg sym "$symbol" '.tokens[$sym].cg_id // "null"' "$ROOT_DIR/assets/priceFeeds.json" 2>/dev/null)
+    fallback=$(jq -r --arg sym "$symbol" '.tokens[$sym].fallback_usd // "null"' "$ROOT_DIR/assets/priceFeeds.json" 2>/dev/null)
+
+    # If no feed at all, skip
+    if [ "$cg_id" = "null" ] && [ "$fallback" = "null" ]; then
+        echo "N/A"; return
     fi
-    # Check cache (valid for 5 min)
-    local cache_time cache_val
+
+    # Check cache (valid 5 min)
     if [ -f "$PRICE_CACHE_FILE" ]; then
+        local cache_val cache_time
         cache_val=$(grep "^${symbol}=" "$PRICE_CACHE_FILE" 2>/dev/null | cut -d= -f2 | cut -d'|' -f1) || ""
         cache_time=$(grep "^${symbol}=" "$PRICE_CACHE_FILE" 2>/dev/null | cut -d= -f2 | cut -d'|' -f2) || "0"
         local now; now=$(date +%s)
         if [ -n "$cache_val" ] && [ "$now" -lt "$((cache_time + 300))" ] 2>/dev/null; then
-            echo "$cache_val"
-            return
+            echo "$cache_val"; return
         fi
     fi
-    # Fetch from CoinGecko
-    local resp price
-    resp=$(curl -s --connect-timeout 10 --max-time 15 \
-        "https://api.coingecko.com/api/v3/simple/price?ids=${cg_id}&vs_currencies=usd" 2>/dev/null) || true
-    price=$(echo "$resp" | jq -r --arg id "$cg_id" '.[$id].usd // "N/A"' 2>/dev/null)
-    # Cache
-    echo "${symbol}=${price}|$(date +%s)" >> "$PRICE_CACHE_FILE"
-    echo "$price"
+
+    # Try CoinGecko live
+    if [ "$cg_id" != "null" ] && [ -n "$cg_id" ]; then
+        local resp price
+        resp=$(curl -s --connect-timeout 8 --max-time 12 \
+            "https://api.coingecko.com/api/v3/simple/price?ids=${cg_id}&vs_currencies=usd" 2>/dev/null) || true
+        price=$(echo "$resp" | jq -r --arg id "$cg_id" '.[$id].usd // "N/A"' 2>/dev/null)
+        if [ "$price" != "N/A" ] && [ "$price" != "null" ] && [ -n "$price" ]; then
+            echo "${symbol}=${price}|$(date +%s)" >> "$PRICE_CACHE_FILE"
+            echo "$price"; return
+        fi
+    fi
+
+    # Fallback to approximate price
+    if [ "$fallback" != "null" ] && [ -n "$fallback" ]; then
+        echo "${symbol}=${fallback}|$(date +%s)" >> "$PRICE_CACHE_FILE"
+        echo "$fallback"; return
+    fi
+
+    echo "N/A"
 }
 
 format_balance() {
