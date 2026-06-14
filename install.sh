@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install.sh — Install pharos-crosschain-indexer
 # Usage: bash install.sh
-set -euo pipefail
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
