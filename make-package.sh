@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# make-package.sh — Create distributable zip for pharos-crosschain-indexer
+# make-package.sh â€” Create distributable zip for pharos-crosschain-indexer
 # Usage: bash make-package.sh
 # Output: pharos-crosschain-indexer-v0.1.0.zip
 set -euo pipefail
@@ -37,7 +37,7 @@ cd "$ROOT_DIR"
 rm -rf "$TEMP_DIR"
 
 echo ""
-echo "✅ Package created: ${PKG_NAME}.zip"
+echo "âœ… Package created: ${PKG_NAME}.zip"
 ls -lh "$OUTPUT"
 echo ""
 echo "Distribute to developers:"

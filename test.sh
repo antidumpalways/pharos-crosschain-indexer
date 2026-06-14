@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# test.sh — Run validation tests for pharos-crosschain-indexer
+# test.sh â€” Run validation tests for pharos-crosschain-indexer
 # Usage: bash test.sh
 set -euo pipefail
 
@@ -12,20 +12,20 @@ PASS=0
 FAIL=0
 SKIP=0
 
-pass() { echo -e "  ${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
-fail() { echo -e "  ${RED}✗${NC} $1 — $2"; FAIL=$((FAIL + 1)); }
-skip() { echo -e "  ${CYAN}⊘${NC} $1 — $2"; SKIP=$((SKIP + 1)); }
+pass() { echo -e "  ${GREEN}âœ“${NC} $1"; PASS=$((PASS + 1)); }
+fail() { echo -e "  ${RED}âœ—${NC} $1 â€” $2"; FAIL=$((FAIL + 1)); }
+skip() { echo -e "  ${CYAN}âŠ˜${NC} $1 â€” $2"; SKIP=$((SKIP + 1)); }
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 INDEXER="$SCRIPT_DIR/scripts/indexer"
 
 echo ""
-echo "═══════════════════════════════════════════════════════"
-echo "  Pharos Cross-Chain Indexer — Test Suite"
-echo "═══════════════════════════════════════════════════════"
+echo "â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
+echo "  Pharos Cross-Chain Indexer â€” Test Suite"
+echo "â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
 echo ""
 
-# ── Test 1: CLI help works ───────────────────────────────────────
+# â”€â”€ Test 1: CLI help works â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo "1. CLI help"
 if bash "$INDEXER" help > /dev/null 2>&1; then
     pass "help command works"
@@ -33,7 +33,7 @@ else
     fail "help command failed" "scripts/indexer may be broken"
 fi
 
-# ── Test 2: File structure ───────────────────────────────────────
+# â”€â”€ Test 2: File structure â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo ""
 echo "2. File structure"
 for f in SKILL.md README.md package.json install.sh LICENSE \
@@ -48,7 +48,7 @@ for f in SKILL.md README.md package.json install.sh LICENSE \
     fi
 done
 
-# ── Test 3: JSON is valid ────────────────────────────────────────
+# â”€â”€ Test 3: JSON is valid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo ""
 echo "3. JSON validation"
 for f in assets/networks.json assets/tokens.json skills.json; do
@@ -59,7 +59,7 @@ for f in assets/networks.json assets/tokens.json skills.json; do
     fi
 done
 
-# ── Test 4: Dependency check ─────────────────────────────────────
+# â”€â”€ Test 4: Dependency check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo ""
 echo "4. Dependencies"
 for dep in curl jq; do
@@ -70,12 +70,12 @@ for dep in curl jq; do
     fi
 done
 if command -v cast > /dev/null 2>&1; then
-    pass "cast (Foundry) found — faster RPC enabled"
+    pass "cast (Foundry) found â€” faster RPC enabled"
 else
     skip "cast not found" "Falling back to curl. Install Foundry for speed."
 fi
 
-# ── Test 5: Real Atlantic RPC connectivity ───────────────────────
+# â”€â”€ Test 5: Real Atlantic RPC connectivity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo ""
 echo "5. Network connectivity"
 RPC="https://atlantic.dplabs-internal.com"
@@ -96,7 +96,7 @@ else
     skip "Atlantic RPC unreachable (HTTP $HTTP_CODE)" "Network may be down"
 fi
 
-# ── Test 6: Real balance query ───────────────────────────────────
+# â”€â”€ Test 6: Real balance query â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo ""
 echo "6. Real balance query (Atlantic testnet)"
 BAL=$(bash "$INDEXER" balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 atlantic-testnet 2>/dev/null | grep "PHRS" | awk '{print $2}')
@@ -108,7 +108,7 @@ else
     fail "Balance query failed" "scripts/indexer may be broken"
 fi
 
-# ── Test 7: Multi-chain query ──────────────────────────────────
+# â”€â”€ Test 7: Multi-chain query â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo ""
 echo "7. Multi-chain query (Atlantic + Pacific)"
 if bash "$INDEXER" balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 2>&1 | grep -q "atlantic-testnet\|pacific-mainnet"; then
@@ -117,12 +117,12 @@ else
     skip "Multi-chain not verified" "External RPCs may be down"
 fi
 
-# ── Summary ──────────────────────────────────────────────────────
+# â”€â”€ Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo ""
-echo "═══════════════════════════════════════════════════════"
+echo "â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
 TOTAL=$((PASS + FAIL + SKIP))
 echo "  Results: ${GREEN}$PASS passed${NC}, ${RED}$FAIL failed${NC}, ${CYAN}$SKIP skipped${NC} ($TOTAL total)"
-echo "═══════════════════════════════════════════════════════"
+echo "â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
 
 if [ $FAIL -gt 0 ]; then
     echo ""
