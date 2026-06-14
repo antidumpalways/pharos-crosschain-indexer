@@ -73,9 +73,12 @@ chains.sort(key=lambda c: c["gas"])
 # Suggestions
 count = 0
 
-# 1. Cheapest gas
+# 1. Gas prices - ALL chains (top 15)
 cheapest = chains[0]
-print(f"  [GAS] Cheapest chain: {cheapest['name']} at {cheapest['gas']} gwei")
+print("  [GAS] Gas prices across chains (cheapest first):")
+for c in chains[:15]:
+    marker = " <<< CHEAPEST" if c == cheapest else ""
+    print(f"    {c['name']:<22s} {c['gas']:>8.2f} gwei{marker}")
 count += 1
 
 # 2. Where you have native balance
