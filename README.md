@@ -1,6 +1,6 @@
 # Pharos Cross-Chain Indexer
 
-> **1 command. 15 chains. Real data. Zero gas.**
+> **1 command. 112 chains. Real data. Zero gas.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Claude Code](https://img.shields.io/badge/compatible-Claude%20Code-black.svg)](https://claude.ai) [![Cursor](https://img.shields.io/badge/compatible-Cursor-black.svg)](https://cursor.sh) [![Codex](https://img.shields.io/badge/compatible-Codex-black.svg)](https://openai.com/codex) [![Pharos Atlantic](https://img.shields.io/badge/Atlantic-Testnet-7b3fe4.svg)](https://atlantic.pharosscan.xyz) [![Pharos Pacific](https://img.shields.io/badge/Pacific-Mainnet-7b3fe4.svg)](https://www.pharosscan.xyz) [![Skill Engine](https://img.shields.io/badge/extends-pharos--skill--engine-blue.svg)](https://github.com/PharosNetwork/pharos-skill-engine) [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows%20(WSL)-lightgrey.svg)]()
 
