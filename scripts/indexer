@@ -45,14 +45,10 @@ get_explorers() {
 # USD price conversion via CoinGecko + fallback
 get_usd_price() {
     local symbol="$1"
-    local cg_id fallback
+    local cg_id
     cg_id=$(jq -r --arg sym "$symbol" '.tokens[$sym].cg_id // "null"' "$ROOT_DIR/assets/priceFeeds.json" 2>/dev/null)
-    fallback=$(jq -r --arg sym "$symbol" '.tokens[$sym].fallback_usd // "null"' "$ROOT_DIR/assets/priceFeeds.json" 2>/dev/null)
 
-    # If no feed at all, skip
-    if [ "$cg_id" = "null" ] && [ "$fallback" = "null" ]; then
-        echo "N/A"; return
-    fi
+    if [ "$cg_id" = "null" ] || [ -z "$cg_id" ]; then echo "N/A"; return; fi
 
     # Check cache (valid 5 min)
     if [ -f "$PRICE_CACHE_FILE" ]; then
@@ -65,24 +61,16 @@ get_usd_price() {
         fi
     fi
 
-    # Try CoinGecko live
-    if [ "$cg_id" != "null" ] && [ -n "$cg_id" ]; then
-        local resp price
-        resp=$(curl -s --connect-timeout 8 --max-time 12 \
-            "https://api.coingecko.com/api/v3/simple/price?ids=${cg_id}&vs_currencies=usd" 2>/dev/null) || true
-        price=$(echo "$resp" | jq -r --arg id "$cg_id" '.[$id].usd // "N/A"' 2>/dev/null)
-        if [ "$price" != "N/A" ] && [ "$price" != "null" ] && [ -n "$price" ]; then
-            echo "${symbol}=${price}|$(date +%s)" >> "$PRICE_CACHE_FILE"
-            echo "$price"; return
-        fi
-    fi
+    # Fetch live from CoinGecko
+    local price resp
+    resp=$(curl -s --connect-timeout 8 --max-time 12 \
+        "https://api.coingecko.com/api/v3/simple/price?ids=${cg_id}&vs_currencies=usd" 2>/dev/null) || true
+    price=$(echo "$resp" | jq -r ".[\"${cg_id}\"].usd // \"N/A\"" 2>/dev/null)
 
-    # Fallback to approximate price
-    if [ "$fallback" != "null" ] && [ -n "$fallback" ]; then
-        echo "${symbol}=${fallback}|$(date +%s)" >> "$PRICE_CACHE_FILE"
-        echo "$fallback"; return
+    if [ "$price" != "N/A" ] && [ "$price" != "null" ] && [ -n "$price" ]; then
+        echo "${symbol}=${price}|$(date +%s)" >> "$PRICE_CACHE_FILE"
+        echo "$price"; return
     fi
-
     echo "N/A"
 }
 

@@ -1,17 +1,17 @@
 {
-  "description": "USD price feeds for native tokens. Live CoinGecko fetch with fallback values.",
+  "description": "CoinGecko IDs for live USD price conversion via --usd flag.",
   "source": "https://api.coingecko.com/api/v3/simple/price",
   "tokens": {
-    "ETH":   { "cg_id": "ethereum",      "fallback_usd": 3500 },
-    "POL":   { "cg_id": "matic-network", "fallback_usd": 0.45 },
-    "BNB":   { "cg_id": "binancecoin",   "fallback_usd": 650 },
-    "AVAX":  { "cg_id": "avalanche-2",   "fallback_usd": 28 },
-    "FTM":   { "cg_id": "fantom",        "fallback_usd": 0.60 },
-    "XDAI":  { "cg_id": "dai",           "fallback_usd": 1.0 },
-    "CELO":  { "cg_id": "celo",          "fallback_usd": 0.55 },
-    "SOL":   { "cg_id": "solana",        "fallback_usd": 180 },
-    "GLMR":  { "cg_id": "moonbeam",      "fallback_usd": 0.20 },
-    "PHRS":  { "cg_id": null,            "fallback_usd": null, "note": "No public price feed yet" },
-    "PROS":  { "cg_id": null,            "fallback_usd": null, "note": "No public price feed yet" }
+    "ETH":   { "cg_id": "ethereum" },
+    "POL":   { "cg_id": "matic-network" },
+    "BNB":   { "cg_id": "binancecoin" },
+    "AVAX":  { "cg_id": "avalanche-2" },
+    "FTM":   { "cg_id": "fantom" },
+    "XDAI":  { "cg_id": "dai" },
+    "CELO":  { "cg_id": "celo" },
+    "SOL":   { "cg_id": "solana" },
+    "GLMR":  { "cg_id": "moonbeam" },
+    "PHRS":  { "cg_id": null, "note": "No CoinGecko listing yet" },
+    "PROS":  { "cg_id": "pharos-network" }
   }
 }
