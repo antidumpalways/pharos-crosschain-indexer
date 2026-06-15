@@ -153,23 +153,34 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 
 | Requirement | Status |
 |---|---|
-| SKILL.md with Capability Index | 5 rows, natural-language phrasings |
-| Reference file complete (command + params + output + errors + guidelines) | `references/indexer.md` — all 5 operations |
+| SKILL.md with Capability Index | 14 rows, natural-language phrasings |
+| Reference file complete (command + params + output + errors + guidelines) | 10 reference files |
 | Agent Guidelines per operation | Numbered steps per section |
 | Error messages match actual responses | Mapped per operation |
-| Assets folder configured | `networks.json` + `tokens.json` |
+| Assets folder configured | `networks.json` (112 chains) + `tokens.json` + `priceFeeds.json` |
+| CI/CD | GitHub Actions auto-test on push |
+| Live data verified | Atlantic 14.95 PHRS, Solana 1.85 SOL, Near 2911 NEAR, Vitalik 58 ETH Sepolia |
 
 ---
 
-## 5 Capabilities, 1 Command Each
+## 14 Capabilities, 1 Command Each
 
 | # | User Says | Agent Calls | Output |
 |---|---|---|---|
-| 1 | "Check balance everywhere" | `indexer balance <addr>` | Table: chain, balance, symbol |
+| 1 | "Check balance everywhere" | `indexer bal <addr>` | Table: chain, balance, symbol (112 chains) |
 | 2 | "Where is this tx?" | `indexer tx <hash>` | Chain found, block, explorer link |
-| 3 | "Show my full portfolio" | `indexer portfolio <addr>` | All tokens x all chains |
-| 4 | "Who is this address?" | `indexer label <addr>` | Label + source |
-| 5 | "Is this verified?" | `indexer verify <contract>` | Verified chain + source URL |
+| 3 | "Show my full portfolio" | `indexer port <addr>` | All tokens x all chains |
+| 4 | "Who is this address?" | `indexer lab <addr>` | Label + source |
+| 5 | "Is this verified?" | `indexer ver <contract>` | Verified chain + source URL |
+| 6 | "Which chains are online?" | `indexer health` | 14/15 LIVE RPC check |
+| 7 | "Compare gas prices" | `indexer gas` | Gas prices across 112 chains |
+| 8 | "Rank chains by USDC" | `indexer top <addr> <token>` | Chains sorted by token balance |
+| 9 | "Analyze my portfolio" | `indexer suggest <addr>` | Bridge/gas/deploy recommendations |
+| 10 | "Export portfolio to CSV" | `python3 scripts/export.py <addr> csv` | CSV file |
+| 11 | "Export portfolio to HTML" | `python3 scripts/export.py <addr> html` | HTML report |
+| 12 | "Snapshot my balance" | `python3 scripts/diff.py save <addr>` | JSON snapshot |
+| 13 | "Compare balance changes" | `python3 scripts/diff.py diff <addr>` | Delta table |
+| 14 | "Track balance history" | `python3 scripts/history.py record <addr>` | Time-series JSONL |
 
 ---
 
