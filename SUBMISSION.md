@@ -1,12 +1,12 @@
-# Submission — Pharos Cross-Chain Indexer
+# Submission â€” Pharos Cross-Chain Indexer
 
 ## Hackathon
-**Skill-to-Agent Dual Cascade Hackathon** by Pharos × Anvita Flow
+**Skill-to-Agent Dual Cascade Hackathon** by Pharos Ã— Anvita Flow
 **Prize pool:** 50,000 PROS (Phase 1: 20K across 40 winners)
 **Phase 1 deadline:** June 17, 2026 (extended from June 15)
 
 ## What we're submitting
-**`pharos-crosschain-indexer`** — a cross-chain data query skill that extends `pharos-skill-engine` with 5 multi-chain read operations. No contract deploy. No gas. Pure data.
+**`pharos-crosschain-indexer`** â€” a cross-chain data query skill that extends `pharos-skill-engine` with 14 multi-chain read operations. No contract deploy. No gas. Pure data.
 
 ## The problem
 Pharos operates multiple chains (Atlantic testnet, Pacific mainnet) AND bridges to external testnets (Sepolia, Base Sepolia, Arbitrum Sepolia via CCIP/CCTP/LayerZero). But today, there's no single tool to answer:
@@ -19,14 +19,14 @@ Developers cobble together per-chain explorers and per-chain RPC queries. This s
 
 ## What judges will see
 
-1. **No mock, no deploy** — all queries hit live APIs. No fake data.
-2. **Follows the official skill format exactly** — `SKILL.md` + `references/` + `assets/` per [Pharos Skill Engine Guide](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide)
+1. **No mock, no deploy** â€” all queries hit live APIs. No fake data.
+2. **Follows the official skill format exactly** â€” `SKILL.md` + `references/` + `assets/` per [Pharos Skill Engine Guide](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide)
 3. **Capability Index** maps 5 natural-language intents to reference sections
 4. **Every reference section** follows the standard template (Overview, Command, Params, Output, Error, Agent Guidelines)
-5. **Working CLI** — `scripts/indexer` is a self-contained bash script that an AI agent can call directly
-6. **Multi-chain token registry** — `assets/tokens.json` covers Atlantic, Pacific, Ethereum, Base, Arbitrum tokens
+5. **Working CLI** â€” `scripts/indexer` is a self-contained bash script that an AI agent can call directly
+6. **Multi-chain token registry** â€” `assets/tokens.json` covers Atlantic, Pacific, Ethereum, Base, Arbitrum tokens
 
-## 5 operations
+## 14 operations
 
 | Operation | User says | Agent does |
 |---|---|---|
@@ -49,9 +49,9 @@ Developers cobble together per-chain explorers and per-chain RPC queries. This s
 
 | Other submissions (likely) | This submission |
 |---|---|
-| 1-2 operations | 5 operations across chains |
+| 1-2 operations | 14 operations across chains |
 | Single-chain | Multi-chain (Pharos + Ethereum + Base + Arbitrum) |
-| Requires contract deploy | Pure read — zero deploy |
+| Requires contract deploy | Pure read â€” zero deploy |
 | Hard to demo | 1 command, instant output |
 | Reinvents the wheel | Extends official `pharos-skill-engine` format |
 
@@ -75,14 +75,14 @@ cd pharos-crosschain-indexer
 
 | Checklist item (from docs Part 4) | Status |
 |---|---|
-| Contract compiles (`forge build`) | N/A — no contracts |
+| Contract compiles (`forge build`) | N/A â€” no contracts |
 | Contract deployed on testnet | N/A |
 | Contract verified on Pharos Scan | N/A |
-| Reference file complete | ✅ `references/indexer.md` — 5 operations, all with command template + params + output + errors + agent guidelines |
-| Agent Guidelines written | ✅ Each operation has numbered steps |
-| Capability Index updated | ✅ `SKILL.md` has 5 rows with natural-language phrasings |
-| Assets copied | ✅ `assets/networks.json` + `assets/tokens.json` |
-| Error messages match | ✅ Error table per operation matches actual API responses |
+| Reference file complete | âœ… `references/indexer.md` â€” 14 operations, all with command template + params + output + errors + agent guidelines |
+| Agent Guidelines written | âœ… Each operation has numbered steps |
+| Capability Index updated | âœ… `SKILL.md` has 5 rows with natural-language phrasings |
+| Assets copied | âœ… `assets/networks.json` + `assets/tokens.json` |
+| Error messages match | âœ… Error table per operation matches actual API responses |
 
 ## License
 
