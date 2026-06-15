@@ -163,24 +163,104 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 
 ---
 
-## 14 Capabilities, 1 Command Each
+## 14 Capabilities — NLP Triggers + Commands
 
-| # | User Says | Agent Calls | Output |
-|---|---|---|---|
-| 1 | "Check balance everywhere" | `indexer bal <addr>` | Table: chain, balance, symbol (112 chains) |
-| 2 | "Where is this tx?" | `indexer tx <hash>` | Chain found, block, explorer link |
-| 3 | "Show my full portfolio" | `indexer port <addr>` | All tokens x all chains |
-| 4 | "Who is this address?" | `indexer lab <addr>` | Label + source |
-| 5 | "Is this verified?" | `indexer ver <contract>` | Verified chain + source URL |
-| 6 | "Which chains are online?" | `indexer health` | 14/15 LIVE RPC check |
-| 7 | "Compare gas prices" | `indexer gas` | Gas prices across 112 chains |
-| 8 | "Rank chains by USDC" | `indexer top <addr> <token>` | Chains sorted by token balance |
-| 9 | "Analyze my portfolio" | `indexer suggest <addr>` | Bridge/gas/deploy recommendations |
-| 10 | "Export portfolio to CSV" | `python3 scripts/export.py <addr> csv` | CSV file |
-| 11 | "Export portfolio to HTML" | `python3 scripts/export.py <addr> html` | HTML report |
-| 12 | "Snapshot my balance" | `python3 scripts/diff.py save <addr>` | JSON snapshot |
-| 13 | "Compare balance changes" | `python3 scripts/diff.py diff <addr>` | Delta table |
-| 14 | "Track balance history" | `python3 scripts/history.py record <addr>` | Time-series JSONL |
+### 1. Multi-Chain Balance (112 chains)
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Check my balance on all chains" | `./scripts/indexer bal 0xFF11f4Be...` | `atlantic-testnet 14.95 PHRS, avalanche-fuji 0.0002 AVAX, ethereum 0.00 ETH` ... |
+| "What do I have on Pharos?" | `./scripts/indexer bal 0x... atlantic-testnet` | `atlantic-testnet 14.9555 PHRS` |
+| "Show me ETH on every chain" | `./scripts/indexer bal 0x...` (filtered) | Scans 112 chains, shows all with ETH |
+| "Check balance on Solana" | `./scripts/indexer bal 0x... solana` | `solana 1.851041 SOL` |
+| "Balance with USD" | `./scripts/indexer bal 0x... --usd` | `ethereum-sepolia 0.0 ETH ($0.00)` |
+
+### 2. Cross-Chain Tx Lookup
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Where is this transaction?" | `./scripts/indexer tx 0x33a1...` | `[OK] Found on arbitrum-sepolia — block 12345678` |
+| "Find tx 0xabc..." | `./scripts/indexer find 0xabc...` | Scans all explorer APIs, returns first match |
+| "Is this tx on Atlantic or Pacific?" | `./scripts/indexer tx 0x...` | Auto-detects which Pharos chain it's on |
+
+### 3. Portfolio Overview
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Show my full portfolio" | `./scripts/indexer port 0xf39Fd6...` | `atlantic-testnet 14.95 PHRS, sepolia 0.002 ETH, fuji 0.0002 AVAX` |
+| "What tokens do I own everywhere?" | `./scripts/indexer pf 0x...` | All native + ERC-20 tokens across 112 chains |
+| "Portfolio with dollar values" | `./scripts/indexer port 0x... --usd` | `atlantic-testnet 14.95 PHRS (N/A), ethereum-sepolia 0.0 ETH ($0.00)` |
+
+### 4. Address Label
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Who is 0xd8dA...6045?" | `./scripts/indexer lab 0xd8dA6BF2...` | `vitalik.eth [ENS] — ethereum (Etherscan)` |
+| "Label this address" | `./scripts/indexer who 0x...` | Searches PharosScan + Etherscan |
+| "Is this a known contract?" | `./scripts/indexer label 0x...` | Returns verified contract name if found |
+
+### 5. Contract Verification
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Is this contract verified?" | `./scripts/indexer ver 0xe7f1725E...` | `[OK] Verified on ethereum` or `Not verified` |
+| "Check source code available" | `./scripts/indexer verify 0x...` | Queries all explorer APIs |
+
+### 6. RPC Health Check
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Which chains are online?" | `./scripts/indexer health` | `atlantic-testnet ✓ LIVE 24135882, celo-alfajores ✗ DOWN` |
+| "Network status" | `./scripts/indexer ping` | 14/15 chains LIVE with real block numbers |
+| "Health in JSON for my agent" | `./scripts/indexer health --json` | `[{"chain":"atlantic-testnet","status":"LIVE","block":"24135882"}]` |
+
+### 7. Gas Price Comparison
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Compare gas prices" | `./scripts/indexer gas` | `base-sepolia 0.01 gwei, atlantic 10 gwei, polygon-amoy 30 gwei, celo 202 gwei` |
+| "Which chain is cheapest?" | `./scripts/indexer price` | `ethereum-sepolia 0.00 gwei <<< CHEAPEST` |
+| "Gas on Atlantic only" | `./scripts/indexer gas atlantic-testnet` | `atlantic-testnet 10.00 gwei` |
+
+### 8. Top Chains by Token
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Where is my USDC?" | `./scripts/indexer top 0x... USDC` | Chains ranked by USDC balance, highest first |
+| "Rank chains by WETH" | `./scripts/indexer rank 0x... WETH` | `ethereum 2.5, base 1.0, arbitrum 0.0` |
+| "Which chain has most ETH?" | `./scripts/indexer top 0x... ETH` | Descending order across all 112 chains |
+
+### 9. Portfolio Suggestions
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Analyze my portfolio" | `./scripts/indexer suggest 0x...` | `[GAS] Cheapest: ethereum-sepolia 0.0 gwei`, `[BRIDGE] 14.95 PHRS Atlantic → bridge to Sepolia`, `[USDC] Available on 15 chains` |
+| "Where should I bridge?" | `./scripts/indexer rec 0x...` | Bridge recommendation based on gas + balances |
+| "What actions should I take?" | `./scripts/indexer suggest 0x...` | 4 recommendations: GAS, BALANCE, BRIDGE, USDC |
+
+### 10. Export Portfolio
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Export my portfolio to CSV" | `python3 scripts/export.py 0x... csv` | `data/portfolio_0xf39Fd6e5.csv — 34 chains` |
+| "Generate HTML report" | `python3 scripts/export.py 0x... html` | `data/portfolio_0xd8dA6BF2.html — 65 chains` (Vitalik) |
+| "Download portfolio for compliance" | `python3 scripts/export.py 0x... csv` | Ready for Excel / Google Sheets import |
+
+### 11. Balance Snapshot
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Snapshot my balance" | `python3 scripts/diff.py save 0x...` | `Snapshot saved: 13 chains with balance` |
+| "Record current state" | `python3 scripts/diff.py save 0x...` | JSON saved to `data/snapshot.json` |
+
+### 12. Balance Diff
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Compare with my last snapshot" | `python3 scripts/diff.py diff 0x...` | `Chain, Before, After, Delta` table |
+| "How much did my balance change?" | `python3 scripts/diff.py diff 0x...` | Shows ± changes per chain |
+
+### 13. History Tracking
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Track my balance over time" | `python3 scripts/history.py record 0x...` | `Recorded: 33 chains at Tue Jun 16` |
+| "Show balance history" | `python3 scripts/history.py show` | Time-series table + chain-specific trends |
+| "How many snapshots?" | `python3 scripts/history.py count` | `3` |
+
+### 14. Balance Alert
+| User Says | Agent Executes | Real Output |
+|---|---|---|
+| "Alert me if balance changes" | `python3 scripts/alert.py 0x...` | Monitors every 30s, prints 🔺/🔻 on change |
+| "Watch Atlantic for ±1 PHRS" | `python3 scripts/alert.py 0x... atlantic-testnet 1.0 60` | Checks every 60s, alerts if delta > 1 PHRS |
+| "Notify on any wallet movement" | `python3 scripts/alert.py 0x... all 0.001 30` | Watches all 112 chains every 30s |
 
 ---
 
