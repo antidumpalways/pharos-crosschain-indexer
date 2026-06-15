@@ -291,25 +291,48 @@ pharos-crosschain-indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 
 ---
 
-## Supported Chains
+## Supported Chains (112 Total)
 
-| Chain | Chain ID | Explorer API | Status |
+**110 EVM Mainnets + Testnets** from drpc.org plus **2 Non-EVM** (Solana + Near). All queries are live — no mock data.
+
+### Pharos Networks (2)
+| Chain | Chain ID | RPC | Status |
 |---|---|---|---|
-| **Pharos Atlantic** (testnet) | `688689` | `api.socialscan.io/pharos-atlantic-testnet` | Live |
-| **Pharos Pacific** (mainnet) | `1672` | `api.socialscan.io/pharos-mainnet` | Live |
-| Ethereum Sepolia | `11155111` | `api-sepolia.etherscan.io` | Live |
-| Optimism Sepolia | `11155420` | `api-sepolia-optimism.etherscan.io` | Live |
-| Base Sepolia | `84532` | `api-sepolia.basescan.org` | Live |
-| Arbitrum Sepolia | `421614` | `api-sepolia.arbiscan.io` | Live |
-| Polygon Amoy | `80002` | `api-amoy.polygonscan.com` | Live |
-| BSC Testnet | `97` | `api-testnet.bscscan.com` | Live |
-| Avalanche Fuji | `43113` | `api-testnet.snowtrace.io` | Live |
-| Scroll Sepolia | `534351` | `api-sepolia.scrollscan.com` | Live |
-| Linea Sepolia | `59141` | `api-sepolia.lineascan.build` | Live |
-| Blast Sepolia | `168587773` | `api-sepolia.blastscan.io` | Live |
-| Celo Alfajores | `44787` | `api-alfajores.celoscan.io` | Live |
-| Gnosis Chiado | `10200` | `gnosis-chiado.blockscout.com` | Live |
-| zkSync Sepolia | `300` | `block-explorer-api.sepolia.zksync.dev` | Live |
+| **Atlantic** (testnet) | `688689` | `atlantic.dplabs-internal.com` | Live |
+| **Pacific** (mainnet) | `1672` | `rpc.pharos.xyz` | Live |
+
+### Major EVM Mainnets (15)
+| Chain | Chain ID | RPC | Status |
+|---|---|---|---|
+| Ethereum | `1` | `ethereum-rpc.publicnode.com` | Live |
+| BNB Smart Chain | `56` | `bsc.drpc.org` | Live |
+| Polygon | `137` | `polygon.drpc.org` | Live |
+| Arbitrum One | `42161` | `arbitrum.drpc.org` | Live |
+| Optimism | `10` | `optimism.drpc.org` | Live |
+| Base | `8453` | `base.drpc.org` | Live |
+| Fantom | `250` | `fantom.drpc.org` | Live |
+| Avalanche | `43114` | `avalanche.drpc.org` | Live |
+| Gnosis | `100` | `gnosis.drpc.org` | Live |
+| Celo | `42220` | `celo.drpc.org` | Live |
+| Scroll | `534352` | `scroll.drpc.org` | Live |
+| Linea | `59144` | `linea.drpc.org` | Live |
+| Blast | `81457` | `blast.drpc.org` | Live |
+| zkSync | `324` | `zksync.drpc.org` | Live |
+| Moonbeam | `1284` | `moonbeam.drpc.org` | Live |
+
+### Special & Non-EVM (2)
+| Chain | Chain ID | API | Status |
+|---|---|---|---|
+| **Solana** | — | `api.mainnet-beta.solana.com` (JSON-RPC) | Live (1.85 SOL verified) |
+| **Near** | — | `api.nearblocks.io` (REST) | Live (2911 NEAR verified) |
+
+### EVM Testnets (13)
+Ethereum Sepolia, Optimism Sepolia, Base Sepolia, Arbitrum Sepolia, Polygon Amoy, BSC Testnet, Avalanche Fuji, Scroll Sepolia, Linea Sepolia, Blast Sepolia, Celo Alfajores, Gnosis Chiado, zkSync Sepolia
+
+### Additional EVM Mainnets (82)
+ApeChain, Aurora, Arbitrum Nova, Berachain, BitTorrent, BOB, Boba, B², Core, Cronos, Cronos zkEVM, Dymension, ETC, Edge, Everclear, Flare, Fraxtal, Fuse, GOAT, Gravity, HAQQ, Harmony, HashKey, Hemi, Immutable, Ink, Jovay, Kaia, Katana, Kava, Kite, Lens, Lisk, Manta, Mantle, MegaETH, Merlin, Metal, Metis, Mezo, Moca, Mode, Moonriver, Morph, Neon EVM, OKTC, opBNB, Orderly, Playnance, Plasma, Plume, Ronin, Rootstock, Sei, Shibarium, Sonic, Soneium, Stable, Story, Superseed, Swell, Tac, Taiko, Tea, Telos, Thundercore, Unichain, Viction, Wemix, Worldchain, XLayer, Zero, ZetaChain, Zircuit, Zora, Hyperliquid — **and 10 more**.
+
+Add any chain: edit `assets/networks.json`. Zero code change. Auto-discovered by all 14 commands.
 
 Add any chain — edit `assets/networks.json`, add the explorer API URL, done.
 
