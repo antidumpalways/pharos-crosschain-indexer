@@ -274,8 +274,8 @@ cmd_tx() {
         if [ "$status" = "1" ] || [ "$status" = "0x1" ]; then
             local block
             block=$(echo "$resp" | jq -r '.result.blockNumber // "?"' 2>/dev/null)
-            echo -e "  ${GREEN}[OK] Found on $chain${NC} -- block ${block}
-            echo "    Explorer: ${explorerUrl}/tx/${txhash}
+            printf '%s\n' "  ${GREEN}[OK] Found on $chain${NC} -- block ${block}"
+            printf '%s\n' "    Explorer: ${explorerUrl}/tx/${txhash}"
             found=$((found + 1))
             break
         fi
@@ -283,7 +283,7 @@ cmd_tx() {
 
     if [ $found -eq 0 ]; then
         echo "  Transaction not found on any indexed chain."
-        echo "  (It may still be pending, or on a chain not in networks.json)"
+        printf '%s\n' "  It may still be pending, or on a chain not in networks.json"
     fi
     echo ""
 }

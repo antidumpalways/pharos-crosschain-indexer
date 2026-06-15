@@ -1,0 +1,58 @@
+{
+  "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "timestamp": 1781557522,
+  "balances": {
+    "atlantic-testnet": {
+      "balance": 7.477738,
+      "token": "PHRS"
+    },
+    "arbitrum-sepolia": {
+      "balance": 0.002976,
+      "token": "ETH"
+    },
+    "avalanche-fuji": {
+      "balance": 0.00023,
+      "token": "AVAX"
+    },
+    "zksync-sepolia": {
+      "balance": 2.4e-05,
+      "token": "ETH"
+    },
+    "zksync": {
+      "balance": 2e-06,
+      "token": "ETH"
+    },
+    "fantom": {
+      "balance": 1e-05,
+      "token": "FTM"
+    },
+    "kaia": {
+      "balance": 3.560822,
+      "token": "KAIA"
+    },
+    "apechain": {
+      "balance": 0.002206,
+      "token": "APE"
+    },
+    "haqq": {
+      "balance": 3.5e-05,
+      "token": "ISLM"
+    },
+    "playnance": {
+      "balance": 2e-06,
+      "token": "PBG"
+    },
+    "zetachain": {
+      "balance": 0.000126,
+      "token": "ZETA"
+    },
+    "tac": {
+      "balance": 0.00216,
+      "token": "ETH"
+    },
+    "lens": {
+      "balance": 1e-06,
+      "token": "ETH"
+    }
+  }
+}
