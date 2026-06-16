@@ -34,7 +34,7 @@ AGENT: [Reads SKILL.md -> activation.triggers: 'analyze my portfolio']
 |  Address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266  |
 =========================================================
 
-  [GAS] Gas prices across chains:
+  [GAS] Gas prices across 101 live chains:
     base-sepolia        0.01 gwei <<< CHEAPEST
     ethereum            0.07 gwei
     bsc                 0.05 gwei
@@ -124,8 +124,8 @@ LO: "Which chains are online right now?"
 AGENT: [Reads SKILL.md -> trigger: 'which chains are online']
        [Executes: python3 scripts/suggest.py 0xf39Fd6... | head -35]
 
-  14/15 chains LIVE with real block numbers.
-  Only celo-alfajores DOWN (testnet maintenance).
+  101/110 EVM chains LIVE (90%). Only 9 DEAD.
+  Plus 2 non-EVM: Solana + Near (both LIVE).
 
 LO: "Compare gas prices — where's cheapest to deploy a contract?"
 
