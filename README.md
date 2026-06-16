@@ -35,7 +35,7 @@ When a developer asks:
 ## Verifiable At a Glance
 
 ```
-$ ./scripts/indexer balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+$ ./scripts/indexer balance <YOUR_ADDRESS>
 
 | Chain             | Balance        | Symbol |
 |-------------------|----------------|--------|
@@ -104,16 +104,16 @@ git clone https://github.com/PharosNetwork/pharos-crosschain-indexer
 cd pharos-crosschain-indexer
 
 # 1. Real Atlantic testnet query (returns live data)
-./scripts/indexer balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 atlantic-testnet
+./scripts/indexer balance <YOUR_ADDRESS> atlantic-testnet
 # Output: atlantic-testnet   14.9555 PHRS  <-- REAL
 
 # 2. Multi-chain (Atlantic + Pacific simultaneously)
-./scripts/indexer balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+./scripts/indexer balance <YOUR_ADDRESS>
 # Output: atlantic-testnet   14.9555 PHRS
-#         pacific-mainnet     0.0    PROS
+#         pacific-mainnet      0.0    PROS
 
 # 3. Full portfolio across all chains
-./scripts/indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+./scripts/indexer portfolio <YOUR_ADDRESS>
 ```
 
 ---
@@ -168,11 +168,11 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 ### 1. Multi-Chain Balance (112 chains)
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Check my balance on all chains" | `./scripts/indexer bal 0xFF11f4Be...` | `atlantic-testnet 14.95 PHRS, avalanche-fuji 0.0002 AVAX, ethereum 0.00 ETH` ... |
-| "What do I have on Pharos?" | `./scripts/indexer bal 0x... atlantic-testnet` | `atlantic-testnet 14.9555 PHRS` |
-| "Show me ETH on every chain" | `./scripts/indexer bal 0x...` (filtered) | Scans 112 chains, shows all with ETH |
-| "Check balance on Solana" | `./scripts/indexer bal 0x... solana` | `solana 1.851041 SOL` |
-| "Balance with USD" | `./scripts/indexer bal 0x... --usd` | `ethereum-sepolia 0.0 ETH ($0.00)` |
+| "Check my balance on all chains" | `./scripts/indexer bal <ADDRESS>` | `atlantic-testnet 14.95 PHRS, avalanche-fuji 0.0002 AVAX` ... |
+| "What do I have on Pharos?" | `./scripts/indexer bal <ADDRESS> atlantic-testnet` | `atlantic-testnet 14.9555 PHRS` |
+| "Show me ETH on every chain" | `./scripts/indexer bal <ADDRESS>` | Scans 112 chains, shows all with ETH |
+| "Check balance on Solana" | `./scripts/indexer bal <ADDRESS> solana` | `solana 1.851041 SOL` |
+| "Balance with USD" | `./scripts/indexer bal <ADDRESS> --usd` | `ethereum-sepolia 0.0 ETH ($0.00)` |
 
 ### 2. Cross-Chain Tx Lookup
 | User Says | Agent Executes | Real Output |
@@ -184,14 +184,14 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 ### 3. Portfolio Overview
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Show my full portfolio" | `./scripts/indexer port 0xf39Fd6...` | `atlantic-testnet 14.95 PHRS, sepolia 0.002 ETH, fuji 0.0002 AVAX` |
-| "What tokens do I own everywhere?" | `./scripts/indexer pf 0x...` | All native + ERC-20 tokens across 112 chains |
-| "Portfolio with dollar values" | `./scripts/indexer port 0x... --usd` | `atlantic-testnet 14.95 PHRS (N/A), ethereum-sepolia 0.0 ETH ($0.00)` |
+| "Show my full portfolio" | `./scripts/indexer port <ADDRESS>` | `atlantic-testnet 14.95 PHRS, sepolia 0.002 ETH` |
+| "What tokens do I own everywhere?" | `./scripts/indexer pf <ADDRESS>` | All native + ERC-20 tokens across 112 chains |
+| "Portfolio with dollar values" | `./scripts/indexer port <ADDRESS> --usd` | `atlantic-testnet 14.95 PHRS (N/A), ethereum-sepolia 0.0 ETH ($0.00)` |
 
 ### 4. Address Label
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Who is 0xd8dA...6045?" | `./scripts/indexer lab 0xd8dA6BF2...` | `vitalik.eth [ENS] — ethereum (Etherscan)` |
+| "Who is this address?" | `./scripts/indexer lab <ADDRESS>` | `vitalik.eth [ENS] — ethereum (Etherscan)` |
 | "Label this address" | `./scripts/indexer who 0x...` | Searches PharosScan + Etherscan |
 | "Is this a known contract?" | `./scripts/indexer label 0x...` | Returns verified contract name if found |
 
@@ -232,8 +232,8 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 ### 10. Export Portfolio
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Export my portfolio to CSV" | `python3 scripts/export.py 0x... csv` | `data/portfolio_0xf39Fd6e5.csv — 34 chains` |
-| "Generate HTML report" | `python3 scripts/export.py 0x... html` | `data/portfolio_0xd8dA6BF2.html — 65 chains` (Vitalik) |
+| "Export my portfolio to CSV" | `python3 scripts/export.py <ADDRESS> csv` | `data/portfolio.csv` |
+| "Generate HTML report" | `python3 scripts/export.py <ADDRESS> html` | `data/portfolio.html` |
 | "Download portfolio for compliance" | `python3 scripts/export.py 0x... csv` | Ready for Excel / Google Sheets import |
 
 ### 11. Balance Snapshot
@@ -280,13 +280,13 @@ bash <(curl -fsSL https://raw.githubusercontent.com/antidumpalways/pharos-crossc
 npm install -g pharos-crosschain-indexer
 
 # npx (no install)
-npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+npx pharos-crosschain-indexer balance <YOUR_ADDRESS>
 ```
 
 **Start querying:**
 ```bash
-pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
-pharos-crosschain-indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+pharos-crosschain-indexer balance <YOUR_ADDRESS>
+pharos-crosschain-indexer portfolio <YOUR_ADDRESS>
 ```
 
 ---
