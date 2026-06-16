@@ -90,7 +90,7 @@ This skill directly advances the Pharos vision by:
 
 | Pharos Goal | How This Skill Enables It |
 |---|---|
-| **Agent economy** | Every agent's first question before any action is "what do I have, where?" This skill answers that question across all 15 chains in one call. |
+| **Agent economy** | Every agent's first question before any action is "what do I have, where?" This skill answers that question across all 112 chains in one call. |
 | **Cross-chain interop** | Before bridging via CCIP/CCTP/LayerZero, an agent must verify source-chain balances and compare costs — this skill provides that data. |
 | **On-chain payments (x402)** | An agent pays from the chain with the highest USDC balance — this skill finds it. |
 | **RealFi & institutional** | Portfolio tracking across regulated chains enables compliance-grade asset reporting — the `audit-log` composability path supports this. |
@@ -127,7 +127,7 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 |   `-- requires: pharos-skill-engine
 |
 |-- assets/
-|   |-- networks.json               <-- Base (2) + External (3) = 5 chains
+|   |-- networks.json               <-- 112 chains (110 EVM + Solana + Near)
 |   `-- tokens.json                 <-- Multi-chain token registry
 |
 |-- references/
@@ -205,7 +205,7 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 | User Says | Agent Executes | Real Output |
 |---|---|---|
 | "Which chains are online?" | `./scripts/indexer health` | `atlantic-testnet ✓ LIVE 24135882, celo-alfajores ✗ DOWN` |
-| "Network status" | `./scripts/indexer ping` | 14/15 chains LIVE with real block numbers |
+| "Network status" | `./scripts/indexer ping` | 101/110 EVM chains LIVE (90%) — real block numbers |
 | "Health in JSON for my agent" | `./scripts/indexer health --json` | `[{"chain":"atlantic-testnet","status":"LIVE","block":"24135882"}]` |
 
 ### 7. Gas Price Comparison
