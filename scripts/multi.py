@@ -59,9 +59,9 @@ for addr in addrs[:10]:  # max 10 addresses
             print(f"  {addr:<44s} {name:<22s} {n['nativeToken']:>8s} {bal:>14.6f}")
             found[addr] += 1
 
-        # ERC-20 tokens on this chain
+        # ERC-20 tokens on this chain — query ALL known tokens
         tokens = chain_tokens.get(name, [])
-        for tk in tokens[:5]:  # limit to 5 tokens per chain for speed
+        for tk in tokens:
             raw = erc20_balance(addr, tk["address"], rpc)
             if raw > 0:
                 human = round(raw / (10 ** tk["decimals"]), 6)
