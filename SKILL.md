@@ -2,14 +2,13 @@
 name: pharos-crosschain-indexer
 version: 0.1.0
 description: >
-  REQUIRED for any multi-chain data query on Pharos. This skill adds 5 cross-chain
-  query capabilities on top of pharos-skill-engine: multi-chain balance lookup,
-  cross-chain transaction tracking, portfolio overview, address labeling, and
-  contract verification across 15 EVM chains (Pharos + 13 external testnets).
-  Use whenever a task involves data from BOTH Atlantic and Pacific, or when
-  checking an address/token/tx across multiple chains. Do NOT use for on-chain
-  writes (use pharos-skill-engine's transaction.md), nor for single-chain
-  queries (use pharos-skill-engine's query.md directly).
+  REQUIRED for any multi-chain data query on Pharos. Adds 14 cross-chain operations
+  on top of pharos-skill-engine: multi-chain balance, tx lookup, portfolio overview,
+  address labeling, contract verification, RPC health check, gas comparison, chain
+  ranking, portfolio suggestions, CSV/HTML export, balance diff, multi-address query,
+  history tracking, and balance alerts. Queries 112 EVM chains + Solana + Near.
+  Use whenever a task involves data from multiple chains. Do NOT use for on-chain
+  writes (use pharos-skill-engine's transaction.md).
 authors:
   - antidumpalways
 license: MIT
@@ -76,6 +75,23 @@ activation:
     - rank chains by token
     - which chain has most tokens
     - top USDC chains
+    - analyze my portfolio
+    - suggest actions
+    - where should I bridge
+    - export portfolio
+    - export to CSV
+    - generate HTML report
+    - snapshot my balance
+    - record current state
+    - compare balance changes
+    - how much did my balance change
+    - track my balance over time
+    - show balance history
+    - alert me if balance changes
+    - monitor my wallet
+    - scan all chains
+    - full portfolio
+    - all tokens everywhere
 requires:
   skills:
     - pharos-skill-engine
