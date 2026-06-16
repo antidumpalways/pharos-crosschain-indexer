@@ -26,8 +26,8 @@ interval = int(sys.argv[4]) if len(sys.argv) > 4 else 30
 
 if not addr:
     print("Usage: alert.py <address> [chain] [threshold-eth] [interval-sec]")
-    print("Example: alert.py 0xf39Fd6... atlantic-testnet 1.0 60")
-    print("         alert.py 0xf39Fd6... all 0.01 30")
+    print("Example: alert.py <address> atlantic-testnet 1.0 60")
+    print("         alert.py <address> all 0.01 30")
     sys.exit(1)
 
 # Get initial baseline

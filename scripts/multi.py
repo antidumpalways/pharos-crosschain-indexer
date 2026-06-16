@@ -30,7 +30,7 @@ def erc20_balance(addr, token_addr, rpc_url):
 addrs = sys.argv[1:]
 if not addrs:
     print("Usage: multi.py <addr1> <addr2> ...")
-    print("Example: multi.py 0xf39Fd6... 0xd8dA6BF2...")
+    print("Example: multi.py <addr1> <addr2> ...")
     print("  Scans ALL 112 chains + ERC-20 tokens. Shows only non-zero balances.")
     sys.exit(1)
 

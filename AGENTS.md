@@ -1,8 +1,41 @@
 # Agent Usage — Step-by-Step Examples
 
-> **Target agents:** Claude Code, Cursor, OpenCode, Hermes Agent, Codex, Windsurf  
-> **Skill:** `pharos-crosschain-indexer` v0.1.0  
+> **Target agents:** Claude Code, Gemini CLI, Cursor, OpenCode, Codex, Windsurf
+> **Skill:** `pharos-crosschain-indexer` v0.1.0
 > **Parent:** `pharos-skill-engine` (base)
+
+---
+
+## CRITICAL: Session Memory — Address Required
+
+**This skill REQUIRES an address for most operations.** The agent MUST follow these rules:
+
+1. **If no address provided** — ASK the user: "Which address should I look up? (0x...)"
+2. **Once user provides an address** — REMEMBER it for the entire session. Do not ask again.
+3. **If user says "my wallet" or "my portfolio"** — use the remembered address.
+4. **If a different address is needed** — user will provide it explicitly.
+5. **Never use a demo/fake address** — only use addresses the user has explicitly provided.
+
+### Session memory pattern
+
+```
+User: "Check my balance on all chains"
+Agent: "Which address should I look up? (0x...)"
+User: "0xFF11f4Be26169166A4edb3290De7a0f7aF5D544c"
+Agent: [executes balance query for 0xFF11f4Be...]
+       [REMEMBERS: session_address = 0xFF11f4Be...]
+
+User: "Now show my portfolio"
+Agent: [uses remembered address 0xFF11f4Be... without asking again]
+       [executes portfolio query]
+
+User: "Compare gas prices"
+Agent: [gas command doesn't need address, executes directly]
+
+User: "Check Vitalik's balance too"
+Agent: [uses the NEW address 0xd8dA6BF2... for this query]
+       [BUT keeps 0xFF11f4Be... as session default for "my" queries]
+```
 
 ---
 
@@ -12,152 +45,98 @@
 
 When a user mentions "cross-chain", "balance everywhere", "portfolio", or any trigger phrase, the agent opens `SKILL.md`:
 
-```
-$ cat SKILL.md
-```
-
 The agent sees:
 
 ```yaml
----
-name: pharos-crosschain-indexer
-description: >
-  REQUIRED for any multi-chain data query on Pharos. This skill adds 5 cross-chain
-  query capabilities on top of pharos-skill-engine: multi-chain balance lookup,
-  cross-chain transaction tracking, portfolio overview, address labeling, and
-  contract verification across 15 EVM chains.
----
+activation:
+  triggers:
+    - check my balance everywhere
+    - balance on all chains
+    - multi-chain balance
+    - show my portfolio
+    ...
 ```
 
-👉 Agent knows: "This is the cross-chain data skill. Trigger on balance/portfolio/tx/chain queries."
+Agent knows: "This is the cross-chain data skill. Trigger on any of these phrases."
 
-### Step 2 — Agent reads `references/indexer.md`
+### Step 2 — Agent reads `references/<operation>.md`
 
 The `Capability Index` in `SKILL.md` points to specific sections:
 
 | User Need | Capability | Detailed Instructions |
 |---|---|---|
-| "Check balance across all chains" | `pharos-indexer balance` | → `references/indexer.md#multi-chain-balance` |
-| "Show my full portfolio" | `pharos-indexer portfolio` | → `references/indexer.md#portfolio-overview` |
+| "Check balance across all chains" | `pharos-indexer balance` | `references/balance.md` |
+| "Show my full portfolio" | `pharos-indexer portfolio` | `references/portfolio.md` |
 
-Agent opens `references/indexer.md`, finds the exact command template:
+Agent opens the relevant reference file, finds the exact command template.
 
-```md
-### Command Template
-./scripts/indexer balance <address>
-```
+### Step 3 — Agent checks for address
 
-### Step 3 — Agent executes the command
+Agent checks its session memory for the user's address. If not present, asks the user.
 
-Agent runs exactly what the reference says:
+### Step 4 — Agent executes the command
 
-```bash
-./scripts/indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
-```
-
-Agent reads output, formats it for the user, returns.
+Agent runs exactly what the reference says, with the user's real address.
 
 ---
 
 ## Real Conversation Examples
 
-### Example 1 — Multi-Chain Balance
+### Example 1 — First Query (No Address Yet)
 
 ```
-👤 User: "Check my balance on every chain"
+User: "Check my balance on every chain"
 
-🤖 Agent:
-  • Reads pharos-crosschain-indexer/SKILL.md
-  • Capability Index → "Check balance across all chains" → references/indexer.md#balance
-  • Reads balance section → command template
-  • Executes: ./scripts/indexer balance 0xUSER_ADDRESS
+Agent:
+  • Reads SKILL.md -> trigger: "balance on all chains"
+  • No address in session memory
+  • Asks: "Which address should I look up? (0x...)"
 
-╔══════════════════════════════════════╗
-║  Multi-Chain Balance                 ║
-╠══════════════════════════════════════╣
-║  Address: 0xF39F...2266              ║
-╚══════════════════════════════════════╝
+User: "0xFF11f4Be26169166A4edb3290De7a0f7aF5D544c"
 
-  atlantic-testnet    14.9555 PHRS
-  pacific-mainnet      0.0    PROS
-  ethereum-sepolia     0.0    ETH
-  base-sepolia         0.0    ETH
-  arbitrum-sepolia     0.0    ETH
-  optimism-sepolia     0.0    ETH
-  polygon-amoy         0.0    POL
-  bsc-testnet          0.0    BNB
-  avalanche-fuji       0.0    AVAX
-  scroll-sepolia       0.0    ETH
-  linea-sepolia        0.0    ETH
-  blast-sepolia        0.0    ETH
-  celo-alfajores       0.0    CELO
-  gnosis-chiado        0.0    XDAI
-  zksync-sepolia       0.0    ETH
+Agent:
+  • Saves to session: user_address = 0xFF11f4Be...
+  • Reads references/balance.md -> command template
+  • Executes: ./scripts/indexer bal 0xFF11f4Be...
 
-  📡 Queried 15 chains. You have PHRS on Atlantic.
+  Atlantic testnet    0.0 PHRS
+  Pacific mainnet     0.0 PROS
+  Sepolia             0.0 ETH
+  ... (112 chains total)
+
+  No balance on any chain. Need gas? Apply the Atlantic faucet.
 ```
 
-### Example 2 — Full Portfolio
+### Example 2 — Portfolio (Address Remembered)
 
 ```
-👤 User: "Show me everything I own everywhere"
+User: "Show my full portfolio"
 
-🤖 Agent:
-  • Reads SKILL.md → Capability Index → "Show my full portfolio"
-  • Executes: ./scripts/indexer portfolio 0xUSER_ADDRESS
-  • (Agent queries native balance + all ERC-20 tokens on all 15 chains)
+Agent:
+  • Reads SKILL.md -> trigger: "show my portfolio"
+  • Has session address: 0xFF11f4Be...
+  • Executes: python3 scripts/multi.py 0xFF11f4Be...
 
-  Chain             Token    Balance
-  ────────────────────────────────────
-  atlantic-testnet   PHRS     14.9555
-  atlantic-testnet   USDC   5000.0000
-  atlantic-testnet   WETH      2.0000
-  pacific-mainnet    PROS    250.0000
-  pacific-mainnet    USDC   1000.0000
-
-  💡 Most of your assets are on Atlantic. Consider bridging
-     USDC to Pacific if you need it there for x402 payments.
+  Chain          Token    Balance
+  ───────────────────────────────
+  (shows all native + ERC-20 tokens)
 ```
 
-### Example 3 — Cross-Chain Tx Lookup
+### Example 3 — Different Address (Explicit Override)
 
 ```
-👤 User: "Where is transaction 0x33a1600e7caccbba921526c3fd9dc23ea5e836f7c7f77f89c0a7ef3b55fe1906?"
+User: "Now check Vitalik's portfolio"
 
-🤖 Agent:
-  • Reads references/indexer.md#tx-lookup
-  • Executes: ./scripts/indexer tx 0x33a1600e7caccbba921526c3fd9dc23ea5e836f7c7f77f89c0a7ef3b55fe1906
-  • Agent queries every explorer API sequentially until found
+Agent:
+  • "my" portfolio = session default (0xFF11f4Be...)
+  • "Vitalik's" = explicit different address (0xd8dA6BF2...)
+  • Keeps both in context
+  • Executes: python3 scripts/multi.py 0xd8dA6BF2...
 
-  ✓ Found on arbitrum-sepolia — block 12345678
-    https://sepolia.arbiscan.io/tx/0x33a1...
-
-  This tx is on Arbitrum Sepolia (not Pharos). Status: confirmed.
-```
-
-### Example 4 — Address Label
-
-```
-👤 User: "Who is 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?"
-
-🤖 Agent:
-  • Reads references/indexer.md#label
-  • Executes: ./scripts/indexer label 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
-  • Agent queries PharosScan social graph + Etherscan labels
-
-  vitalik.eth [ENS] — ethereum (Etherscan)
-```
-
-### Example 5 — Contract Verification
-
-```
-👤 User: "Is this contract verified? 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-
-🤖 Agent:
-  • Reads references/indexer.md#verify
-  • Executes: ./scripts/indexer verify 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
-
-  Contract not verified on any indexed chain.
+  ethereum-sepolia    58.24 ETH
+  ethereum-sepolia   800.27 USDC
+  blast-sepolia    18006.95 ETH
+  ...
 ```
 
 ---
@@ -168,41 +147,49 @@ The agent should load `pharos-crosschain-indexer` when the user says ANY of:
 
 | Trigger phrase | Maps to |
 |---|---|
-| "check balance on all chains" / "balance everywhere" | `indexer balance` |
-| "multi-chain" / "cross-chain" / "every chain" | `indexer balance` |
-| "portfolio" / "all my tokens" / "what do I own" | `indexer portfolio` |
-| "where is this transaction" / "find tx" / "tx lookup" | `indexer tx` |
-| "who is this address" / "label" / "identity" | `indexer label` |
-| "verified contract" / "is this verified" / "check source" | `indexer verify` |
-| "Pharos Atlantic" / "Pharos Pacific" + "balance" | `indexer balance` |
-| "Sepolia" / "Amoy" / "Fuji" / "Alfajores" / "Chiado" (any chain name) | `indexer balance <chain-name>` |
+| "check balance on all chains" / "balance everywhere" | `indexer bal` |
+| "show my portfolio" / "all tokens" | `python3 scripts/multi.py` |
+| "where is this transaction" / "find tx" | `indexer tx` |
+| "who is this address" / "label" | `indexer lab` |
+| "is this verified" / "verify contract" | `indexer ver` |
+| "which chains are online" / "network status" | `indexer health` |
+| "compare gas prices" / "cheapest chain" | `indexer gas` |
+| "rank chains by USDC" / "top token" | `indexer top` |
+| "analyze my portfolio" / "suggest actions" | `python3 scripts/suggest.py` |
+| "export portfolio" / "generate report" | `python3 scripts/export.py` |
+| "snapshot my balance" / "record state" | `python3 scripts/diff.py save` |
+| "compare balance" / "what changed" | `python3 scripts/diff.py diff` |
+| "track history" / "balance over time" | `python3 scripts/history.py` |
+| "alert me" / "monitor wallet" | `python3 scripts/alert.py` |
 
 ## Agent Pre-checks (Before Executing)
 
-The agent MUST verify these before calling any `scripts/indexer` command:
-
-1. **Dependency check** — run `which jq`. If missing, tell the user to `apt-get install jq`.
-2. **Network connectivity** — run `curl -s https://atlantic.dplabs-internal.com -o /dev/null -w '%{http_code}'`. If not 200, warn user that Atlantic RPC may be down.
-3. **Skill installed** — the agent is already in the `pharos-crosschain-indexer/` directory. If not, run `git clone` first.
+1. **Address check** — If the operation needs an address AND none is in session memory AND user didn't provide one → ASK. Do not proceed without an address.
+2. **Dependency check** — `which jq`. If missing, tell user to `apt-get install jq`.
+3. **Network check** — `bash test.sh` to verify connectivity.
+4. **Session memory** — After first address query, remember it. Use `session_address` in context.
 
 ## Agent Error Handling
 
-| Error from `scripts/indexer` | Agent tells user |
+| Situation | Agent Response |
 |---|---|
-| `jq: command not found` | "jq not installed. Run: `apt-get install jq` or `brew install jq`" |
+| User says "my balance" but no address provided | "Which address should I look up? (0x...)" |
+| User says "my portfolio" with remembered address | Use the remembered address silently |
+| User provides a different address mid-session | Use the new address but keep old as default |
 | `No balance found` | "No balance on any chain. If you expected funds, check the address." |
-| `Transaction not found` | "Tx not found on any indexed chain. It may still be pending, or on a chain not in networks.json." |
-| `No label found` | "No public label on any indexed chain." |
-| `(unreachable)` next to a chain | "Chain `<name>` is currently unreachable. The RPC may be down." |
-| `cast: command not found` | "`cast` not installed. Falling back to `curl` (slightly slower)." |
+| `Transaction not found` | "Tx not found on any indexed chain." |
+| `cast: command not found` | "Falling back to curl (slightly slower). Install Foundry for speed." |
 
-## Agent Composability Hints
+## Session Context Example
 
-After running a cross-chain query, the agent should suggest next actions:
-
-| Query result | Suggested next action |
-|---|---|
-| "You have 5000 USDC on Atlantic" | "Want me to bridge some to Pacific via `pharos-bridge-cctp`?" |
-| "You have 0 PHRS on Atlantic" | "Need gas? Apply the Atlantic faucet." |
-| "Not verified on any chain" | "Need me to verify this contract using `forge verify-contract`?" |
-| "Found on arbitrum-sepolia" | "Want me to check the receipt on `pharos-explorer`?" |
+```json
+{
+  "session_address": "0xFF11f4Be26169166A4edb3290De7a0f7aF5D544c",
+  "session_chain_preference": "atlantic-testnet",
+  "last_operation": "balance",
+  "known_addresses": {
+    "vitalik": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    "treasury": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  }
+}
+```

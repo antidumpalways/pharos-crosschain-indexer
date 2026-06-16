@@ -19,7 +19,7 @@ cd ~/.claude/skills/pharos-crosschain-indexer && bash install.sh
 Start Claude Code in any project directory with the skill installed:
 
 ```
-> Check my balance on all chains 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+> Check my balance on all chains
 > Analyze my portfolio across 112 chains
 > Show Vitalik's full portfolio with ERC-20 tokens
 > Compare gas prices — where's cheapest to transact?
