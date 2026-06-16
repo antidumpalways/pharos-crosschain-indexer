@@ -180,6 +180,60 @@ The agent should load `pharos-crosschain-indexer` when the user says ANY of:
 | `Transaction not found` | "Tx not found on any indexed chain." |
 | `cast: command not found` | "Falling back to curl (slightly slower). Install Foundry for speed." |
 
+---
+
+## Mandatory Rules (The Agent MUST Follow)
+
+### R1 — Never Guess An Address
+If the operation needs an address and none is provided, ASK. Never use a default, demo, or test address. The only exception is `test.sh` which uses a known anvil address for CI.
+
+### R2 — Remember Session Address
+After the user provides an address once, store it as `session_address`. Use it for all subsequent "my" or "me" queries. The user should only be asked once per session.
+
+### R3 — Testnet by Default, Mainnet With Warning
+All queries default to `atlantic-testnet`. If the user says "mainnet" or specifies a mainnet chain, warn them: "This queries mainnet. Data is live and queries may be rate-limited." Do NOT block — just confirm.
+
+### R4 — Read-Only Only
+This skill performs READ-ONLY queries. Never attempt to send transactions, transfer tokens, or modify state. If the user asks to "send" or "transfer", redirect to `pharos-skill-engine`.
+
+### R5 — Rate Limit Awareness
+Public RPCs have rate limits (typically 5-10 req/sec). When querying all 112 chains, use sequential requests with 100ms delays between chains. If an RPC returns 429, skip that chain and continue. Do not retry more than 3 times.
+
+### R6 — Privacy: Never Echo Sensitive Data
+Never print or store private keys. If a user pastes a private key, warn them: "Your key is now in the chat transcript. Rotate this key immediately." Do not echo the key. Do not store it.
+
+### R7 — Partial Results Are OK
+When querying 112 chains, some RPCs will be unreachable (9/110 DEAD is normal). Show partial results with a summary: "101/110 EVM chains LIVE. 9 unreachable. Results below are from live chains only." Never claim 100% coverage.
+
+### R8 — Suggest Next Action
+After returning results, suggest the most relevant next step:
+- Balance > 0: "Need gas? Check `pharos-faucet` or `pharos-bridge-cctp`."
+- Zero balance: "Need to fund? Apply the Atlantic testnet faucet."
+- Portfolio found: "Want to export this to CSV or HTML?"
+- Gas compared: "Want to deploy on the cheapest chain?"
+
+### R9 — Unified Output Format
+When showing multi-chain data, use this format:
+```
+  Chain             Token    Balance      USD
+  ─────────────────────────────────────────────
+  atlantic-testnet   PHRS     14.9555     N/A
+  ethereum            ETH      5.6889    $9,535
+```
+Consistent column widths. USD column only when `--usd` is requested.
+
+### R10 — Dependency Check Before Execution
+Before running any command, verify:
+1. `which jq` — if missing: "Install jq: `apt-get install jq` or `brew install jq`"
+2. `which curl` — if missing: "Install curl: `apt-get install curl`"
+3. `bash test.sh` — run the test suite once per session to verify connectivity
+
+### R11 — Cache Prices
+CoinGecko prices are cached in `/tmp/pharos_indexer_prices` for 5 minutes. Do not re-fetch prices within the same 5-minute window. Use the cached value.
+
+### R12 — Timeout Gracefully
+RPC queries have a 15-second timeout per chain. If a chain exceeds this, skip it. Show it as "(unreachable)". Do not hold up results for slow chains.
+
 ## Session Context Example
 
 ```json
@@ -187,9 +241,12 @@ The agent should load `pharos-crosschain-indexer` when the user says ANY of:
   "session_address": "0xFF11f4Be26169166A4edb3290De7a0f7aF5D544c",
   "session_chain_preference": "atlantic-testnet",
   "last_operation": "balance",
+  "last_suggestion": "Fund via faucet",
   "known_addresses": {
     "vitalik": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     "treasury": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-  }
+  },
+  "cached_prices_valid_until": 1781367043,
+  "chains_unreachable": ["celo-alfajores"]
 }
 ```
