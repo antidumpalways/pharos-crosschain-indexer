@@ -18,6 +18,12 @@ def balance(addr, rpc):
     try: return int(r.get("result","0x0"), 16) / 1e18
     except: return 0
 
+def erc20(addr, token_addr, rpc):
+    call_data = "0x70a08231" + addr[2:].lower().rjust(64,"0")
+    r = rpc_call(rpc, "eth_call", [{"to":token_addr,"data":call_data}, "latest"])
+    try: return int(r.get("result","0x0"), 16)
+    except: return 0
+
 addr = sys.argv[1] if len(sys.argv) > 1 else None
 fmt = sys.argv[2] if len(sys.argv) > 2 else "csv"
 if not addr:
@@ -36,6 +42,13 @@ for n in nets["networks"]:
     bal = balance(addr, rpc)
     if bal > 0:
         rows.append({"chain": name, "token": n["nativeToken"], "balance": bal, "chainId": n.get("chainId",0)})
+    # ERC-20 tokens
+    for tk in tokens.get(name, [])[:5]:
+        raw = erc20(addr, tk["address"], rpc)
+        if raw > 0:
+            human = round(raw / (10 ** tk["decimals"]), 6)
+            if human > 0.000001:
+                rows.append({"chain": name, "token": tk["symbol"], "balance": human, "chainId": n.get("chainId",0)})
 
 ts = time.strftime("%Y-%m-%d %H:%M:%S")
 

@@ -15,6 +15,18 @@ def get_balance(addr, rpc):
         return round(wei / 1e18, 6)
     except: return 0
 
+def erc20(addr, token_addr, rpc):
+    call_data = "0x70a08231" + addr[2:].lower().rjust(64,"0")
+    try:
+        r = subprocess.run(["curl","-s","--connect-timeout","8","--max-time","12",
+            "-X","POST","-H","Content-Type: application/json",
+            "-d",json.dumps({"jsonrpc":"2.0","method":"eth_call","params":[{"to":token_addr,"data":call_data},"latest"],"id":1}), rpc],
+            capture_output=True, text=True, timeout=15)
+        return int(json.loads(r.stdout).get("result","0x0"), 16)
+    except: return 0
+
+TOKENS_DB = json.load(open(os.path.join(ROOT_DIR, "assets", "tokens.json")))
+
 def cmd_save(addr):
     nets = json.load(open(os.path.join(ROOT_DIR, "assets", "networks.json")))
     snap = {"address": addr, "timestamp": int(time.time()), "balances": {}}
