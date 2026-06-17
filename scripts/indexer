@@ -28,19 +28,30 @@ JSON_OUTPUT=false
 QUIET_MODE=false
 USD_MODE=false
 CSV_MODE=false
+ALL_CHAINS=false
 PRICE_CACHE_FILE="/tmp/pharos_indexer_prices"
 
 # --- helpers ---
 
 die() { echo -e "${RED}ERROR:${NC} $*" >&2; exit 1; }
 info() { echo -e "${CYAN}->${NC} $*"; }
+total_chains() { jq '.networks | length' "$NETWORKS_FILE"; }
+scope_str() { if [ "$ALL_CHAINS" = "true" ]; then echo "all $(total_chains) chains"; else echo "top 15 of $(total_chains) chains (pass --all for all)"; fi; }
 
 get_rpcs() {
-    jq -r '.networks[] | select(.rpcUrl != null and .rpcUrl != "") | "\(.name)|\(.rpcUrl)|\(.chainId)|\(.nativeToken)|\(.type)"' "$NETWORKS_FILE"
+    if [ "$ALL_CHAINS" = "true" ]; then
+        jq -r '.networks[] | select(.rpcUrl != null and .rpcUrl != "") | "\(.name)|\(.rpcUrl)|\(.chainId)|\(.nativeToken)|\(.type)"' "$NETWORKS_FILE"
+    else
+        jq -r '.networks[0:15][] | select(.rpcUrl != null and .rpcUrl != "") | "\(.name)|\(.rpcUrl)|\(.chainId)|\(.nativeToken)|\(.type)"' "$NETWORKS_FILE"
+    fi
 }
 
 get_explorers() {
-    jq -r '.networks[] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
+    if [ "$ALL_CHAINS" = "true" ]; then
+        jq -r '.networks[] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
+    else
+        jq -r '.networks[0:15][] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
+    fi
 }
 
 # USD price conversion via CoinGecko + fallback
@@ -105,6 +116,7 @@ cmd_balance() {
         echo "+---------------------------------------------------------+"
         printf "|  Address: %-42s  |\n" "${addr:0:42}"
         echo "========================================================="
+        echo "  Scope: $(scope_str)"
         echo ""
     fi
 
@@ -455,8 +467,9 @@ cmd_health() {
     if [ "$JSON_OUTPUT" != "true" ]; then
         echo ""
         echo "========================================================="
-        echo "|  RPC Health Check -- All 15 Chains                     |"
+        echo "|  RPC Health Check                                       |"
         echo "========================================================="
+        echo "  Scope: $(scope_str)"
         echo ""
         printf "  %-18s %6s %8s %s\n" "Chain" "ChainID" "Status" "Block"
     fi
@@ -776,6 +789,7 @@ while [[ $# -gt 0 ]]; do
         --csv)  CSV_MODE=true; JSON_OUTPUT=true; shift;;
         --usd|--dollar) USD_MODE=true; shift;;
         --quiet|-q) QUIET_MODE=true; shift;;
+        --all) ALL_CHAINS=true; shift;;
         *) ARGS+=("$1"); shift;;
     esac
 done
@@ -807,6 +821,7 @@ case "${1:-help}" in
         echo "Flags:"
         echo "  --json          Machine-readable JSON output (for agent consumption)"
         echo "  --usd|--dollar  Show estimated USD value alongside balances"
+        echo "  --all           Query ALL configured chains (default: top 15 only)"
         echo "  --quiet|-q      Suppress banners and formatting"
         echo ""
         echo "Aliases: bal=balance, port=portfolio, lab=label, ver=verify"
