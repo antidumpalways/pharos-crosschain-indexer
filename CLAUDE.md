@@ -29,18 +29,27 @@ Start Claude Code in any project directory with the skill installed:
 
 Claude Code reads `SKILL.md` -> `activation.triggers` -> `Capability Index` -> executes the right command.
 
+## Windows note
+
+The indexer is a **bash** script. On Windows, run Claude Code from **Git Bash**
+or **WSL** and always invoke with the `bash` prefix (`bash scripts/indexer ...`).
+Without it, `./scripts/indexer` fails (no shebang exec on Windows) and Claude
+may waste retries trying `python`/`./`. For the Python helpers, `python3` may be
+called as `python` on Windows. This skill is read-only: no wallet, no gas, no
+state changes.
+
 ## All 14 operations
 
 | Trigger phrase | Command executed |
 |---|---|
-| "balance on all chains" | `./scripts/indexer bal <addr>` |
-| "where is this tx" | `./scripts/indexer tx <hash>` |
+| "balance on all chains" | `bash scripts/indexer bal <addr>` |
+| "where is this tx" | `bash scripts/indexer tx <hash>` |
 | "show my portfolio" | `python3 scripts/multi.py <addr>` |
-| "who is this address" | `./scripts/indexer lab <addr>` |
-| "is this verified" | `./scripts/indexer ver <contract>` |
-| "which chains are online" | `./scripts/indexer health` |
-| "compare gas prices" | `./scripts/indexer gas` |
-| "rank chains by USDC" | `./scripts/indexer top <addr> USDC` |
+| "who is this address" | `bash scripts/indexer lab <addr>` |
+| "is this verified" | `bash scripts/indexer ver <contract>` |
+| "which chains are online" | `bash scripts/indexer health` |
+| "compare gas prices" | `bash scripts/indexer gas` |
+| "rank chains by USDC" | `bash scripts/indexer top <addr> USDC` |
 | "analyze my portfolio" | `python3 scripts/suggest.py <addr>` |
 | "export portfolio" | `python3 scripts/export.py <addr> csv\|html` |
 | "snapshot my balance" | `python3 scripts/diff.py save <addr>` |
