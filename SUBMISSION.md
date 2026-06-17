@@ -58,7 +58,7 @@ Developers cobble together per-chain explorers and per-chain RPC queries. This s
 ## How to verify (for judges)
 
 ```bash
-git clone https://github.com/PharosNetwork/pharos-crosschain-indexer
+git clone https://github.com/antidumpalways/pharos-crosschain-indexer
 cd pharos-crosschain-indexer
 
 # 1. Check balance of a known address on Atlantic testnet
@@ -78,9 +78,9 @@ cd pharos-crosschain-indexer
 | Contract compiles (`forge build`) | N/A â€” no contracts |
 | Contract deployed on testnet | N/A |
 | Contract verified on Pharos Scan | N/A |
-| Reference file complete | âœ… `references/indexer.md` â€” 14 operations, all with command template + params + output + errors + agent guidelines |
+| Reference file complete | âœ… `references/*.md` â€” 14 operations, all with command template + params + output + errors + agent guidelines |
 | Agent Guidelines written | âœ… Each operation has numbered steps |
-| Capability Index updated | âœ… `SKILL.md` has 5 rows with natural-language phrasings |
+| Capability Index updated | âœ… `SKILL.md` has 14 capabilities with natural-language phrasings |
 | Assets copied | âœ… `assets/networks.json` + `assets/tokens.json` |
 | Error messages match | âœ… Error table per operation matches actual API responses |
 

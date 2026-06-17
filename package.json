@@ -1,7 +1,7 @@
 {
   "name": "pharos-crosschain-indexer",
   "version": "0.1.0",
-  "description": "Cross-chain data query skill for the Pharos AI Agent economy. Extends pharos-skill-engine with 5 multi-chain read operations across 15 EVM chains. One command. Real data. Zero gas.",
+  "description": "Cross-chain data query skill for the Pharos AI Agent economy. Extends pharos-skill-engine with 14 multi-chain read operations across 112 chains (110 EVM + Solana + Near). One command. Real data. Zero gas.",
   "license": "MIT",
   "author": "antidumpalways",
   "repository": {

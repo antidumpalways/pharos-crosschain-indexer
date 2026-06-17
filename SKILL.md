@@ -162,6 +162,12 @@ npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 | "Check RPC health" / "which chains are online" / "network status" | `pharos-indexer health` | → `references/health.md` |
 | "Compare gas prices" / "gas across chains" / "cheapest chain" | `pharos-indexer gas` | → `references/gas.md` |
 | "Where is my USDC" / "rank chains by token" / "which chain has most" | `pharos-indexer top` | → `references/top.md` |
+| "Analyze my portfolio" / "suggest actions" / "where should I bridge" | `pharos-indexer suggest` | → `scripts/suggest.py` (README §9) |
+| "Export portfolio" / "export to CSV" / "generate HTML report" | `python3 scripts/export.py` | → `scripts/export.py` (README §10) |
+| "Snapshot my balance" / "record current state" | `python3 scripts/diff.py save` | → `scripts/diff.py` (README §11) |
+| "Compare balance changes" / "how much did my balance change" | `python3 scripts/diff.py diff` | → `scripts/diff.py` (README §12) |
+| "Track balance over time" / "show balance history" | `python3 scripts/history.py` | → `scripts/history.py` (README §13) |
+| "Alert me if balance changes" / "monitor my wallet" | `python3 scripts/alert.py` | → `scripts/alert.py` (README §14) |
 
 ## General Error Handling
 
@@ -174,7 +180,7 @@ npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
 ## Write Operation Pre-checks
 
-**Not applicable.** All 5 operations are read-only. No wallet, no private key, no gas.
+**Not applicable.** All 14 operations are read-only. No wallet, no private key, no gas.
 
 ---
 

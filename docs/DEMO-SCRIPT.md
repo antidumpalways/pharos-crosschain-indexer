@@ -199,7 +199,7 @@ AGENT:
   - Extends official pharos-skill-engine format
   - GitHub Actions CI/CD auto-test on every push
   - Works with Claude Code, Gemini CLI, Cursor, OpenCode, Codex
-  - 25 commits, 10 reference files, 6 Python scripts
+  - 25 commits, 9 reference files, 6 Python scripts
   - Zero mock. Zero fake. 100% live API data.
 ```
 

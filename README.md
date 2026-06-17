@@ -28,7 +28,7 @@ When a developer asks:
 
 ## The Solution
 
-**Pharos Cross-Chain Indexer** — a skill that extends `pharos-skill-engine` with 5 multi-chain read operations. One CLI call queries every configured chain simultaneously and presents a unified result.
+**Pharos Cross-Chain Indexer** — a skill that extends `pharos-skill-engine` with 14 multi-chain read operations. One CLI call queries every configured chain simultaneously and presents a unified result.
 
 ---
 
@@ -52,7 +52,7 @@ $ ./scripts/indexer balance <YOUR_ADDRESS>
 ```mermaid
 flowchart TB
     USER["Developer: 'Show my portfolio everywhere'"] --> AGENT["AI Agent (Claude / Cursor / OpenCode)"]
-    AGENT --> SKILL["Reads SKILL.md -> Capability Index -> references/indexer.md"]
+    AGENT --> SKILL["Reads SKILL.md -> Capability Index -> references/*.md"]
     SKILL --> INDEXER["Calls scripts/indexer"]
     INDEXER --> ATL["PharosScan Atlantic (chainId 688689)"]
     INDEXER --> PAC["PharosScan Pacific (chainId 1672)"]
@@ -73,11 +73,11 @@ flowchart TB
 | Judging Criterion | Our Delivery |
 |---|---|
 | **Originality & Creativity** | First cross-chain data aggregator packaged as a Pharos Skill Engine extension. |
-| **Technical Quality & Completeness** | Real API integration (PharosScan + Etherscan). Pure bash + curl + jq. 5 operations, each with command templates, parameter tables, output parsing, and error handling. |
+| **Technical Quality & Completeness** | Real API integration (PharosScan + Etherscan). Pure bash + curl + jq + Python. 14 operations (9 CLI commands + 6 Python scripts), each with command templates, parameter tables, output parsing, and error handling. |
 | **Practical Use for AI Agents** | Every agent needs to answer "what do I have, where?" before acting. |
 | **Reusability & Composability** | Add any chain to `assets/networks.json` — zero code changes. |
 | **Successful Deployment on Pharos** | Tested against live Atlantic RPC (`14.9555 PHRS` verified). No deploy needed. |
-| **User Experience & Documentation** | Mermaid architecture diagram. 5 commands. 2 demo scripts. Full reference file. |
+| **User Experience & Documentation** | Mermaid architecture diagram. 9 CLI commands + 6 Python scripts. 2 demo scripts. 9 reference files. |
 | **Vision Alignment** | Cross-chain = core Pharos narrative (CCIP/CCTP/LayerZero). Agent economy = agents need cross-chain awareness to operate, transact, and interact. This skill provides the data foundation every agent needs before acting across chains. |
 
 ---
@@ -100,7 +100,7 @@ This skill directly advances the Pharos vision by:
 ## Verifiable Proof (Judges: Run This)
 
 ```bash
-git clone https://github.com/PharosNetwork/pharos-crosschain-indexer
+git clone https://github.com/antidumpalways/pharos-crosschain-indexer
 cd pharos-crosschain-indexer
 
 # 1. Real Atlantic testnet query (returns live data)
@@ -130,16 +130,25 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 |   |-- networks.json               <-- 112 chains (110 EVM + Solana + Near)
 |   `-- tokens.json                 <-- Multi-chain token registry
 |
-|-- references/
-|   `-- indexer.md                  <-- 5 operations x standard template
-|       |-- Multi-Chain Balance
-|       |-- Cross-Chain Tx Lookup
-|       |-- Portfolio Overview
-|       |-- Address Label
-|       `-- Contract Verification
+|-- references/                    <-- 9 reference files (standard template each)
+|   |-- balance.md                 <-- Multi-chain balance
+|   |-- tx.md                      <-- Cross-chain tx lookup
+|   |-- portfolio.md               <-- Portfolio overview
+|   |-- label.md                   <-- Address label
+|   |-- verify.md                  <-- Contract verification
+|   |-- health.md                  <-- RPC health check
+|   |-- gas.md                     <-- Gas price comparison
+|   |-- top.md                     <-- Top chains by token
+|   `-- add-chain.md               <-- Add a new chain
 |
 |-- scripts/
-|   `-- indexer                     <-- THE TOOL: 5 commands, 1 bash script
+|   |-- indexer                     <-- THE TOOL: 9 bash commands
+|   |-- suggest.py                  <-- Portfolio suggestions
+|   |-- export.py                   <-- CSV / HTML export
+|   |-- diff.py                     <-- Balance snapshot + diff
+|   |-- history.py                  <-- Time-series tracking
+|   |-- alert.py                    <-- Real-time balance alerts
+|   `-- multi.py                    <-- Multi-address portfolio
 |
 |-- examples/
 |   |-- crosschain-balance.sh
@@ -153,8 +162,8 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 
 | Requirement | Status |
 |---|---|
-| SKILL.md with Capability Index | 14 rows, natural-language phrasings |
-| Reference file complete (command + params + output + errors + guidelines) | 10 reference files |
+| SKILL.md with Capability Index | 14 capabilities, natural-language phrasings |
+| Reference file complete (command + params + output + errors + guidelines) | 9 reference files |
 | Agent Guidelines per operation | Numbered steps per section |
 | Error messages match actual responses | Mapped per operation |
 | Assets folder configured | `networks.json` (112 chains) + `tokens.json` + `priceFeeds.json` |

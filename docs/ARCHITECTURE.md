@@ -21,7 +21,7 @@ The Pharos Cross-Chain Indexer follows the standard 3-layer Pharos Skill Engine 
 │          pharos-crosschain-indexer (THIS SKILL)              │
 │  multi-chain queries: balance · tx · portfolio · label      │
 │  ref: SKILL.md + assets/{networks,tokens}.json +             │
-│       references/indexer.md + scripts/indexer               │
+│       references/*.md + scripts/               │
 └──────────────────────────────┬───────────────────────────────┘
                                │ queries via curl / cast
                                ▼
@@ -39,12 +39,12 @@ The Pharos Cross-Chain Indexer follows the standard 3-layer Pharos Skill Engine 
 ### 1. Why bash + curl + jq instead of a heavy SDK
 
 - **Zero install.** Every system has bash, curl, and jq (or can install in 1 command).
-- **Agent-friendly.** The agent can read `references/indexer.md` and run the exact bash commands listed. No code generation.
+- **Agent-friendly.** The agent can read `references/*.md` (one file per operation) and run the exact bash commands listed. No code generation.
 - **Matches the base engine's philosophy.** The base skill engine is CLI-first. We extend it with the same paradigm.
 
-### 2. Why a single `references/indexer.md` instead of 5 files
+### 2. Why one reference file per operation
 
-The base engine has 4 reference files for 4 distinct domains (query, tx, contract, script-gen). Our 5 operations are all in the **same domain** (cross-chain data query). A single file keeps it simple.
+The base engine has 4 reference files for 4 distinct domains (query, tx, contract, script-gen). We follow the same one-file-per-operation pattern with 9 reference files (`balance.md`, `tx.md`, `portfolio.md`, `label.md`, `verify.md`, `health.md`, `gas.md`, `top.md`, `add-chain.md`), each covering a single cross-chain data operation. The Python-powered capabilities (suggest, export, diff, history, alert, multi) are self-documenting scripts documented in the README.
 
 ### 3. Why no contracts
 

@@ -2,7 +2,7 @@
   "$schema": "https://skills.sh/skill-registry-schema.json",
   "name": "pharos-crosschain-indexer",
   "version": "0.1.0",
-  "description": "Cross-chain data query skill for the Pharos AI Agent economy. 5 multi-chain read operations across 15 EVM chains. Extends pharos-skill-engine.",
+  "description": "Cross-chain data query skill for the Pharos AI Agent economy. 14 multi-chain read operations across 112 chains (110 EVM + Solana + Near). Extends pharos-skill-engine.",
   "author": "antidumpalways",
   "license": "MIT",
   "repository": "https://github.com/antidumpalways/pharos-crosschain-indexer",
@@ -63,7 +63,7 @@
       "id": "balance",
       "name": "Multi-Chain Balance",
       "command": "./scripts/indexer balance <address> [chain]",
-      "description": "Query native token balance across all 15 configured chains",
+      "description": "Query native token balance across all configured chains",
       "readOnly": true
     },
     {
@@ -92,6 +92,69 @@
       "name": "Contract Verification",
       "command": "./scripts/indexer verify <address>",
       "description": "Check if contract source is verified on any explorer",
+      "readOnly": true
+    },
+    {
+      "id": "health",
+      "name": "RPC Health Check",
+      "command": "./scripts/indexer health [chain]",
+      "description": "Ping every configured chain RPC and report LIVE/DOWN + block height",
+      "readOnly": true
+    },
+    {
+      "id": "gas",
+      "name": "Gas Price Comparison",
+      "command": "./scripts/indexer gas [chain]",
+      "description": "Compare current gas price (gwei) across all chains",
+      "readOnly": true
+    },
+    {
+      "id": "top",
+      "name": "Top Chains by Token",
+      "command": "./scripts/indexer top <address> [token]",
+      "description": "Rank chains by an address's balance of a given token (e.g. USDC)",
+      "readOnly": true
+    },
+    {
+      "id": "suggest",
+      "name": "Portfolio Suggestions",
+      "command": "./scripts/indexer suggest <address>",
+      "description": "Analyze balances + gas and suggest bridge / deploy / pay actions",
+      "readOnly": true
+    },
+    {
+      "id": "export",
+      "name": "Export Portfolio",
+      "command": "python3 scripts/export.py <address> [csv|html]",
+      "description": "Export full portfolio to CSV or HTML report",
+      "readOnly": true
+    },
+    {
+      "id": "diff",
+      "name": "Balance Snapshot & Diff",
+      "command": "python3 scripts/diff.py [save|diff] <address>",
+      "description": "Save a balance snapshot and compare later to show per-chain deltas",
+      "readOnly": true
+    },
+    {
+      "id": "history",
+      "name": "History Tracking",
+      "command": "python3 scripts/history.py [record|show|count] <address>",
+      "description": "Record balance snapshots over time and show trends",
+      "readOnly": true
+    },
+    {
+      "id": "alert",
+      "name": "Balance Alert",
+      "command": "python3 scripts/alert.py <address> [chain] [threshold] [interval]",
+      "description": "Monitor an address and alert on balance changes in real time",
+      "readOnly": true
+    },
+    {
+      "id": "multi",
+      "name": "Multi-Address Portfolio",
+      "command": "python3 scripts/multi.py <address> [address...]",
+      "description": "Aggregate portfolio across multiple addresses in one view",
       "readOnly": true
     }
   ],
