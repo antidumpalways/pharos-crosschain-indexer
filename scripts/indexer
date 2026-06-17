@@ -65,8 +65,10 @@ get_usd_price() {
     # Check cache (valid 5 min)
     if [ -f "$PRICE_CACHE_FILE" ]; then
         local cache_val cache_time
-        cache_val=$(grep "^${symbol}=" "$PRICE_CACHE_FILE" 2>/dev/null | cut -d= -f2 | cut -d'|' -f1) || ""
-        cache_time=$(grep "^${symbol}=" "$PRICE_CACHE_FILE" 2>/dev/null | cut -d= -f2 | cut -d'|' -f2) || "0"
+        cache_val=$(grep "^${symbol}=" "$PRICE_CACHE_FILE" 2>/dev/null | cut -d= -f2 | cut -d'|' -f1) || true
+        cache_time=$(grep "^${symbol}=" "$PRICE_CACHE_FILE" 2>/dev/null | cut -d= -f2 | cut -d'|' -f2) || true
+        cache_val="${cache_val:-}"
+        cache_time="${cache_time:-0}"
         local now; now=$(date +%s)
         if [ -n "$cache_val" ] && [ "$now" -lt "$((cache_time + 300))" ] 2>/dev/null; then
             echo "$cache_val"; return

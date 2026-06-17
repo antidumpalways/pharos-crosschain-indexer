@@ -121,14 +121,14 @@ All CLI commands support `--json` (machine-readable) and `--usd` (USD values).
 `bal`=balance, `find`=tx, `port`/`pf`=portfolio, `lab`/`who`=label,
 `ver`=verify, `ping`/`status`=health, `price`=gas, `rank`=top, `rec`=suggest.
 
-## Pre-checks Gemini Must Run First
+## Run commands directly (no pre-checks)
 
-Before executing any command, Gemini should verify:
-
-1. `which jq` — if not found, tell user to install (`winget install jqlang.jq` / `apt-get install jq` / `brew install jq`)
-2. `which curl` and `which python3` — required dependencies
-3. `ls assets/networks.json` — confirm the config file exists
-4. `bash test.sh` — run the test suite (7 tests) to verify everything works
+**Do NOT run `which jq`, `bash test.sh`, or any pre-check before the real command.**
+On Windows PowerShell, `which`, `&&`, and `sed` don't exist — pre-checks fail
+and burn 4-5 retries before the actual command runs. Just run the indexer
+directly. If a dependency is missing, the command's own error will say so
+(e.g. `jq: command not found`) and only then should you tell the user how to
+install it (`winget install jqlang.jq`).
 
 ## Reducing approval prompts
 

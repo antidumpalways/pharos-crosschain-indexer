@@ -162,12 +162,11 @@ The agent should load `pharos-crosschain-indexer` when the user says ANY of:
 | "track history" / "balance over time" | `python3 scripts/history.py` |
 | "alert me" / "monitor wallet" | `python3 scripts/alert.py` |
 
-## Agent Pre-checks (Before Executing)
+## Before Executing (keep it minimal)
 
 1. **Address check** — If the operation needs an address AND none is in session memory AND user didn't provide one → ASK. Do not proceed without an address.
-2. **Dependency check** — `which jq`. If missing, tell user to `apt-get install jq`.
-3. **Network check** — `bash test.sh` to verify connectivity.
-4. **Session memory** — After first address query, remember it. Use `session_address` in context.
+2. **Run the command directly.** Do NOT run pre-checks (`which jq`, `bash test.sh`, etc.). Missing deps report clearly in the command's own output. Pre-checks with `which`/`&&`/`sed` fail on Windows PowerShell and waste turns.
+3. **Session memory** — After first address query, remember it. Use `session_address` in context.
 
 ## Agent Error Handling
 
@@ -222,11 +221,8 @@ When showing multi-chain data, use this format:
 ```
 Consistent column widths. USD column only when `--usd` is requested.
 
-### R10 — Dependency Check Before Execution
-Before running any command, verify:
-1. `which jq` — if missing: "Install jq: `apt-get install jq` or `brew install jq`"
-2. `which curl` — if missing: "Install curl: `apt-get install curl`"
-3. `bash test.sh` — run the test suite once per session to verify connectivity
+### R10 — Run Directly, No Pre-checks
+Run the target command directly. Do NOT pre-run `which jq`, `which curl`, or `bash test.sh` — on Windows PowerShell these (`which`, `&&`, `sed`) don't exist and cause multi-retry loops. If a dependency is truly missing, the command's own error will say so (e.g. `jq: command not found`), and only then tell the user how to install it.
 
 ### R11 — Cache Prices
 CoinGecko prices are cached in `/tmp/pharos_indexer_prices` for 5 minutes. Do not re-fetch prices within the same 5-minute window. Use the cached value.

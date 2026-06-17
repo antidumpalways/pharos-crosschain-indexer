@@ -109,7 +109,7 @@ requires:
 ## Prerequisites
 
 1. **Base engine installed** — `pharos-skill-engine` is the parent skill
-2. **`curl` + `jq`** — both pre-installed on most systems (`which jq` to check; if missing: `apt-get install jq` / `brew install jq`)
+2. **`curl` + `jq` + `python3`** — required. Don't pre-check for them; just run the command and only install if the error says one is missing (`apt-get install jq` / `brew install jq` / `winget install jqlang.jq`)
 3. **Optional API keys** — free-tier access works without a key for public endpoints; for higher rate limits, get keys at:
    - PharosScan: https://api.socialscan.io
    - Etherscan-compatible chains: free tier API key per chain
