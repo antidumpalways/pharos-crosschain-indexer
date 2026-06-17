@@ -10,7 +10,7 @@ Find a transaction hash across chains. The indexer queries every configured expl
 
 ## Command Template
 ```bash
-./scripts/indexer tx <tx-hash>
+bash scripts/indexer tx <tx-hash>
 ```
 
 ## Parameters

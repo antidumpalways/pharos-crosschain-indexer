@@ -10,14 +10,18 @@ Query native token balance across all configured chains for a single address. Re
 
 ## Command Template
 ```bash
-./scripts/indexer balance <address> [chain]
+bash scripts/indexer balance <address> [chain] [--all]
 ```
+
+> **Default scope:** top 15 chains (fast). Add `--all` only when the user
+> explicitly asks for "all/every chain".
 
 ## Parameters
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | address | address | Yes | EOA or contract address (0x + 40 hex) |
-| chain | string | No | Filter to a specific chain name; omit for all |
+| chain | string | No | Filter to a specific chain name; omit for top 15 |
+| --all | flag | No | Scan ALL configured chains instead of the top 15 |
 
 ## Output Parsing
 | Field | Description |

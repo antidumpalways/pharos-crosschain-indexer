@@ -30,11 +30,11 @@ Developers cobble together per-chain explorers and per-chain RPC queries. This s
 
 | Operation | User says | Agent does |
 |---|---|---|
-| **Multi-chain balance** | "Check my balance across all chains" | `./scripts/indexer balance <addr>` |
-| **Cross-chain tx lookup** | "Where is this transaction?" | `./scripts/indexer tx <hash>` |
-| **Portfolio overview** | "Show my full portfolio" | `./scripts/indexer portfolio <addr>` |
-| **Address label** | "Who is this address?" | `./scripts/indexer label <addr>` |
-| **Contract verification** | "Is this contract verified?" | `./scripts/indexer verify <addr>` |
+| **Multi-chain balance** | "Check my balance across all chains" | `bash scripts/indexer balance <addr>` |
+| **Cross-chain tx lookup** | "Where is this transaction?" | `bash scripts/indexer tx <hash>` |
+| **Portfolio overview** | "Show my full portfolio" | `bash scripts/indexer portfolio <addr>` |
+| **Address label** | "Who is this address?" | `bash scripts/indexer label <addr>` |
+| **Contract verification** | "Is this contract verified?" | `bash scripts/indexer verify <addr>` |
 
 ## Honest disclosure
 
@@ -62,13 +62,13 @@ git clone https://github.com/antidumpalways/pharos-crosschain-indexer
 cd pharos-crosschain-indexer
 
 # 1. Check balance of a known address on Atlantic testnet
-./scripts/indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+bash scripts/indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
 # 2. Full portfolio
-./scripts/indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+bash scripts/indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 
 # 3. Label lookup
-./scripts/indexer label 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+bash scripts/indexer label 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 ```
 
 ## Compliance with official skill publishing checklist

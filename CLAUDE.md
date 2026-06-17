@@ -40,6 +40,11 @@ state changes.
 
 ## All 14 operations
 
+> **Default scope = top 15 chains** (fast). Add `--all` only when the user
+> explicitly asks for "all/every chain". Pick **one** command per intent — never
+> run several speculatively. Form: `bash scripts/indexer <cmd>` or
+> `python3 scripts/<name>.py`.
+
 | Trigger phrase | Command executed |
 |---|---|
 | "balance on all chains" | `bash scripts/indexer bal <addr>` |

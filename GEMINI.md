@@ -93,6 +93,11 @@ Chain added and verified.
 
 ## All 14 Capabilities
 
+> **Default scope = top 15 chains** (fast, seconds). Add `--all` ONLY when the user
+> explicitly says "all/every chain". Pick **one** command per intent — never try
+> several. Correct form is always `bash scripts/indexer <cmd>` (or
+> `python3 scripts/<name>.py` for the Python tools).
+
 | Trigger phrase | Command executed |
 |---|---|
 | "balance on all chains" | `bash scripts/indexer balance <addr>` |

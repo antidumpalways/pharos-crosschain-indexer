@@ -10,7 +10,7 @@ Query a specific ERC-20 token balance across all chains and rank chains from hig
 
 ## Command Template
 ```bash
-./scripts/indexer top <address> [token-symbol] [--json]
+bash scripts/indexer top <address> [token-symbol] [--json] [--all]
 ```
 
 ## Parameters

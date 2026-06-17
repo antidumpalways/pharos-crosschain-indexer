@@ -10,7 +10,7 @@ Check whether a contract at a given address is verified (source code published) 
 
 ## Command Template
 ```bash
-./scripts/indexer verify <contract-address> [chain]
+bash scripts/indexer verify <contract-address> [chain]
 ```
 
 ## Parameters

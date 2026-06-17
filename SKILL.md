@@ -169,6 +169,42 @@ npx pharos-crosschain-indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 | "Track balance over time" / "show balance history" | `python3 scripts/history.py` | → `scripts/history.py` (README §13) |
 | "Alert me if balance changes" / "monitor my wallet" | `python3 scripts/alert.py` | → `scripts/alert.py` (README §14) |
 
+## Default Scope: Top 15 Chains (IMPORTANT for agents)
+
+**By default every multi-chain command scans only the top 15 (highest-priority)
+chains** — Pharos Atlantic/Pacific first, then Ethereum/Base/Arbitrum/Optimism/
+Polygon/BSC/Avalanche/Solana/Near/etc. This returns in seconds.
+
+Only add `--all` when the user **explicitly** asks for "all chains", "every
+chain", "all 112", or says the asset is on an unusual chain.
+
+| User says | Use |
+|---|---|
+| "check my balance" / "what do I have" (default) | `bash scripts/indexer balance <addr>` (top 15) |
+| "check my balance on **all** chains" / "every chain" | `bash scripts/indexer balance <addr> --all` |
+| "balance on <specific chain>" | `bash scripts/indexer balance <addr> <chain>` (single chain) |
+
+Applies to: `balance`, `portfolio`, `health`, `gas`, `top`, `suggest`. All accept `--all`.
+
+## How to pick the command (agent cheat-sheet)
+
+Pick **one** command based on the user's intent — do not try multiple:
+
+| Intent (what the user wants) | Run this, nothing else |
+|---|---|
+| Native balance across chains | `bash scripts/indexer balance <addr>` |
+| All tokens (native + ERC-20) across chains | `bash scripts/indexer portfolio <addr>` |
+| Find which chain a tx is on | `bash scripts/indexer tx <hash>` |
+| Who/what is an address | `bash scripts/indexer label <addr>` |
+| Is a contract verified | `bash scripts/indexer verify <addr>` |
+| Which chains are online | `bash scripts/indexer health` |
+| Compare gas prices | `bash scripts/indexer gas` |
+| Where is most of a token | `bash scripts/indexer top <addr> <TOKEN>` |
+| Suggest bridge/deploy actions | `bash scripts/indexer suggest <addr>` |
+
+If unsure, ask the user which intent they mean. **Never** run several commands
+speculatively.
+
 ## General Error Handling
 
 | Error | Cause | Fix |
@@ -233,19 +269,19 @@ This skill was built for the Pharos Agent Center Skill Builder Campaign. https:/
 
 ```bash
 # Check ETH balance across all chains
-./scripts/indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+bash scripts/indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
 # Find a transaction (auto-detects the chain)
-./scripts/indexer tx 0x33a1600e7caccbba921526c3fd9dc23ea5e836f7c7f77f89c0a7ef3b55fe1906
+bash scripts/indexer tx 0x33a1600e7caccbba921526c3fd9dc23ea5e836f7c7f77f89c0a7ef3b55fe1906
 
 # Full portfolio (all tokens, all chains)
-./scripts/indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+bash scripts/indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 
 # Who is this address?
-./scripts/indexer label 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+bash scripts/indexer label 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
 # Is this contract verified?
-./scripts/indexer verify 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+bash scripts/indexer verify 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 ```
 
 See `examples/` for full demo scripts.

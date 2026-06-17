@@ -132,7 +132,7 @@ jq '.optimism = [{
 
 ```bash
 # Test the new chain works
-./scripts/indexer balance <address> <chain-name>
+bash scripts/indexer balance <address> <chain-name>
 
 # Or run full test suite
 bash test.sh
@@ -163,5 +163,5 @@ jq 'del(.networks[] | select(.name == "<chain-name>"))' assets/networks.json > /
 > 3. Append the entry to `assets/networks.json` using `jq` (single command)
 > 4. If tokens are known, also add to `assets/tokens.json`
 > 5. Run `python3 -m json.tool assets/networks.json` to validate JSON
-> 6. Test with `./scripts/indexer balance <address> <new-chain-name>`
+> 6. Test with `bash scripts/indexer balance <address> <new-chain-name>`
 > 7. Tell the user the chain is added and ready

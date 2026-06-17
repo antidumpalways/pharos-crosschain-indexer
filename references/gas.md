@@ -10,7 +10,7 @@ Compare current gas prices across all configured chains. Calls `eth_gasPrice` on
 
 ## Command Template
 ```bash
-./scripts/indexer gas [chain] [--json]
+bash scripts/indexer gas [chain] [--json] [--all]
 ```
 
 ## Parameters

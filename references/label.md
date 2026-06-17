@@ -10,7 +10,7 @@ Look up the label, name, or social profile associated with an address. Uses Phar
 
 ## Command Template
 ```bash
-./scripts/indexer label <address>
+bash scripts/indexer label <address>
 ```
 
 ## Parameters

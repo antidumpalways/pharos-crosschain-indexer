@@ -10,7 +10,7 @@ Ping all configured chain RPCs and report which are online vs offline. Returns r
 
 ## Command Template
 ```bash
-./scripts/indexer health [chain] [--json]
+bash scripts/indexer health [chain] [--json] [--all]
 ```
 
 ## Parameters

@@ -35,7 +35,7 @@ When a developer asks:
 ## Verifiable At a Glance
 
 ```
-$ ./scripts/indexer balance <YOUR_ADDRESS>
+$ bash scripts/indexer balance <YOUR_ADDRESS>
 
 | Chain             | Balance        | Symbol |
 |-------------------|----------------|--------|
@@ -104,16 +104,16 @@ git clone https://github.com/antidumpalways/pharos-crosschain-indexer
 cd pharos-crosschain-indexer
 
 # 1. Real Atlantic testnet query (returns live data)
-./scripts/indexer balance <YOUR_ADDRESS> atlantic-testnet
+bash scripts/indexer balance <YOUR_ADDRESS> atlantic-testnet
 # Output: atlantic-testnet   14.9555 PHRS  <-- REAL
 
 # 2. Multi-chain (Atlantic + Pacific simultaneously)
-./scripts/indexer balance <YOUR_ADDRESS>
+bash scripts/indexer balance <YOUR_ADDRESS>
 # Output: atlantic-testnet   14.9555 PHRS
 #         pacific-mainnet      0.0    PROS
 
 # 3. Full portfolio across all chains
-./scripts/indexer portfolio <YOUR_ADDRESS>
+bash scripts/indexer portfolio <YOUR_ADDRESS>
 ```
 
 ---
@@ -177,66 +177,66 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 ### 1. Multi-Chain Balance (112 chains)
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Check my balance on all chains" | `./scripts/indexer bal <ADDRESS>` | `atlantic-testnet 14.95 PHRS, avalanche-fuji 0.0002 AVAX` ... |
-| "What do I have on Pharos?" | `./scripts/indexer bal <ADDRESS> atlantic-testnet` | `atlantic-testnet 14.9555 PHRS` |
-| "Show me ETH on every chain" | `./scripts/indexer bal <ADDRESS>` | Scans 112 chains, shows all with ETH |
-| "Check balance on Solana" | `./scripts/indexer bal <ADDRESS> solana` | `solana 1.851041 SOL` |
-| "Balance with USD" | `./scripts/indexer bal <ADDRESS> --usd` | `ethereum-sepolia 0.0 ETH ($0.00)` |
+| "Check my balance on all chains" | `bash scripts/indexer bal <ADDRESS>` | `atlantic-testnet 14.95 PHRS, avalanche-fuji 0.0002 AVAX` ... |
+| "What do I have on Pharos?" | `bash scripts/indexer bal <ADDRESS> atlantic-testnet` | `atlantic-testnet 14.9555 PHRS` |
+| "Show me ETH on every chain" | `bash scripts/indexer bal <ADDRESS>` | Scans 112 chains, shows all with ETH |
+| "Check balance on Solana" | `bash scripts/indexer bal <ADDRESS> solana` | `solana 1.851041 SOL` |
+| "Balance with USD" | `bash scripts/indexer bal <ADDRESS> --usd` | `ethereum-sepolia 0.0 ETH ($0.00)` |
 
 ### 2. Cross-Chain Tx Lookup
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Where is this transaction?" | `./scripts/indexer tx 0x33a1...` | `[OK] Found on arbitrum-sepolia — block 12345678` |
-| "Find tx 0xabc..." | `./scripts/indexer find 0xabc...` | Scans all explorer APIs, returns first match |
-| "Is this tx on Atlantic or Pacific?" | `./scripts/indexer tx 0x...` | Auto-detects which Pharos chain it's on |
+| "Where is this transaction?" | `bash scripts/indexer tx 0x33a1...` | `[OK] Found on arbitrum-sepolia — block 12345678` |
+| "Find tx 0xabc..." | `bash scripts/indexer find 0xabc...` | Scans all explorer APIs, returns first match |
+| "Is this tx on Atlantic or Pacific?" | `bash scripts/indexer tx 0x...` | Auto-detects which Pharos chain it's on |
 
 ### 3. Portfolio Overview
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Show my full portfolio" | `./scripts/indexer port <ADDRESS>` | `atlantic-testnet 14.95 PHRS, sepolia 0.002 ETH` |
-| "What tokens do I own everywhere?" | `./scripts/indexer pf <ADDRESS>` | All native + ERC-20 tokens across 112 chains |
-| "Portfolio with dollar values" | `./scripts/indexer port <ADDRESS> --usd` | `atlantic-testnet 14.95 PHRS (N/A), ethereum-sepolia 0.0 ETH ($0.00)` |
+| "Show my full portfolio" | `bash scripts/indexer port <ADDRESS>` | `atlantic-testnet 14.95 PHRS, sepolia 0.002 ETH` |
+| "What tokens do I own everywhere?" | `bash scripts/indexer pf <ADDRESS>` | All native + ERC-20 tokens across 112 chains |
+| "Portfolio with dollar values" | `bash scripts/indexer port <ADDRESS> --usd` | `atlantic-testnet 14.95 PHRS (N/A), ethereum-sepolia 0.0 ETH ($0.00)` |
 
 ### 4. Address Label
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Who is this address?" | `./scripts/indexer lab <ADDRESS>` | `vitalik.eth [ENS] — ethereum (Etherscan)` |
-| "Label this address" | `./scripts/indexer who 0x...` | Searches PharosScan + Etherscan |
-| "Is this a known contract?" | `./scripts/indexer label 0x...` | Returns verified contract name if found |
+| "Who is this address?" | `bash scripts/indexer lab <ADDRESS>` | `vitalik.eth [ENS] — ethereum (Etherscan)` |
+| "Label this address" | `bash scripts/indexer who 0x...` | Searches PharosScan + Etherscan |
+| "Is this a known contract?" | `bash scripts/indexer label 0x...` | Returns verified contract name if found |
 
 ### 5. Contract Verification
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Is this contract verified?" | `./scripts/indexer ver 0xe7f1725E...` | `[OK] Verified on ethereum` or `Not verified` |
-| "Check source code available" | `./scripts/indexer verify 0x...` | Queries all explorer APIs |
+| "Is this contract verified?" | `bash scripts/indexer ver 0xe7f1725E...` | `[OK] Verified on ethereum` or `Not verified` |
+| "Check source code available" | `bash scripts/indexer verify 0x...` | Queries all explorer APIs |
 
 ### 6. RPC Health Check
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Which chains are online?" | `./scripts/indexer health` | `atlantic-testnet ✓ LIVE 24135882, celo-alfajores ✗ DOWN` |
-| "Network status" | `./scripts/indexer ping` | 101/110 EVM chains LIVE (90%) — real block numbers |
-| "Health in JSON for my agent" | `./scripts/indexer health --json` | `[{"chain":"atlantic-testnet","status":"LIVE","block":"24135882"}]` |
+| "Which chains are online?" | `bash scripts/indexer health` | `atlantic-testnet ✓ LIVE 24135882, celo-alfajores ✗ DOWN` |
+| "Network status" | `bash scripts/indexer ping` | 101/110 EVM chains LIVE (90%) — real block numbers |
+| "Health in JSON for my agent" | `bash scripts/indexer health --json` | `[{"chain":"atlantic-testnet","status":"LIVE","block":"24135882"}]` |
 
 ### 7. Gas Price Comparison
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Compare gas prices" | `./scripts/indexer gas` | `base-sepolia 0.01 gwei, atlantic 10 gwei, polygon-amoy 30 gwei, celo 202 gwei` |
-| "Which chain is cheapest?" | `./scripts/indexer price` | `ethereum-sepolia 0.00 gwei <<< CHEAPEST` |
-| "Gas on Atlantic only" | `./scripts/indexer gas atlantic-testnet` | `atlantic-testnet 10.00 gwei` |
+| "Compare gas prices" | `bash scripts/indexer gas` | `base-sepolia 0.01 gwei, atlantic 10 gwei, polygon-amoy 30 gwei, celo 202 gwei` |
+| "Which chain is cheapest?" | `bash scripts/indexer price` | `ethereum-sepolia 0.00 gwei <<< CHEAPEST` |
+| "Gas on Atlantic only" | `bash scripts/indexer gas atlantic-testnet` | `atlantic-testnet 10.00 gwei` |
 
 ### 8. Top Chains by Token
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Where is my USDC?" | `./scripts/indexer top 0x... USDC` | Chains ranked by USDC balance, highest first |
-| "Rank chains by WETH" | `./scripts/indexer rank 0x... WETH` | `ethereum 2.5, base 1.0, arbitrum 0.0` |
-| "Which chain has most ETH?" | `./scripts/indexer top 0x... ETH` | Descending order across all 112 chains |
+| "Where is my USDC?" | `bash scripts/indexer top 0x... USDC` | Chains ranked by USDC balance, highest first |
+| "Rank chains by WETH" | `bash scripts/indexer rank 0x... WETH` | `ethereum 2.5, base 1.0, arbitrum 0.0` |
+| "Which chain has most ETH?" | `bash scripts/indexer top 0x... ETH` | Descending order across all 112 chains |
 
 ### 9. Portfolio Suggestions
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Analyze my portfolio" | `./scripts/indexer suggest 0x...` | `[GAS] Cheapest: ethereum-sepolia 0.0 gwei`, `[BRIDGE] 14.95 PHRS Atlantic → bridge to Sepolia`, `[USDC] Available on 15 chains` |
-| "Where should I bridge?" | `./scripts/indexer rec 0x...` | Bridge recommendation based on gas + balances |
-| "What actions should I take?" | `./scripts/indexer suggest 0x...` | 4 recommendations: GAS, BALANCE, BRIDGE, USDC |
+| "Analyze my portfolio" | `bash scripts/indexer suggest 0x...` | `[GAS] Cheapest: ethereum-sepolia 0.0 gwei`, `[BRIDGE] 14.95 PHRS Atlantic → bridge to Sepolia`, `[USDC] Available on 15 chains` |
+| "Where should I bridge?" | `bash scripts/indexer rec 0x...` | Bridge recommendation based on gas + balances |
+| "What actions should I take?" | `bash scripts/indexer suggest 0x...` | 4 recommendations: GAS, BALANCE, BRIDGE, USDC |
 
 ### 10. Export Portfolio
 | User Says | Agent Executes | Real Output |

@@ -10,7 +10,7 @@ Query ALL token balances for an address across ALL chains. Combines native balan
 
 ## Command Template
 ```bash
-./scripts/indexer portfolio <address> [chain]
+bash scripts/indexer portfolio <address> [chain] [--all]
 ```
 
 ## Parameters

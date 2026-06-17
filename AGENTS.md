@@ -97,7 +97,7 @@ User: "0xFF11f4Be26169166A4edb3290De7a0f7aF5D544c"
 Agent:
   • Saves to session: user_address = 0xFF11f4Be...
   • Reads references/balance.md -> command template
-  • Executes: ./scripts/indexer bal 0xFF11f4Be...
+  • Executes: bash scripts/indexer bal 0xFF11f4Be...
 
   Atlantic testnet    0.0 PHRS
   Pacific mainnet     0.0 PROS
@@ -233,6 +233,12 @@ CoinGecko prices are cached in `/tmp/pharos_indexer_prices` for 5 minutes. Do no
 
 ### R12 — Timeout Gracefully
 RPC queries have a 15-second timeout per chain. If a chain exceeds this, skip it. Show it as "(unreachable)". Do not hold up results for slow chains.
+
+### R13 — Default to Top 15 Chains (Speed First)
+**By default, multi-chain commands scan only the top 15 chains** (Pharos first, then major EVM + Solana + Near). This returns in seconds. Add `--all` **only** when the user explicitly says "all chains", "every chain", "all 112", or references an unusual chain. Never run `--all` speculatively — scanning 112 chains takes minutes and wastes the user's time. If the result is empty on the top 15, tell the user and offer `--all` rather than running it unprompted.
+
+### R14 — One Command, No Guessing
+Pick **exactly one** command based on the user's intent (see the cheat-sheet in `SKILL.md`). Do not try `./script`, then `python`, then `bash` — the correct form is always `bash scripts/indexer <cmd>` (or `python3 scripts/<name>.py` for the Python tools). If the intent is ambiguous, ask the user instead of running multiple commands.
 
 ## Session Context Example
 

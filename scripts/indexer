@@ -2,11 +2,11 @@
 # scripts/indexer - Cross-chain indexer CLI for Pharos
 #
 # Usage:
-#   ./scripts/indexer balance <address> [chain]
-#   ./scripts/indexer tx <tx-hash>
-#   ./scripts/indexer portfolio <address> [chain]
-#   ./scripts/indexer label <address>
-#   ./scripts/indexer verify <address> [chain]
+#   bash scripts/indexer balance <address> [chain]
+#   bash scripts/indexer tx <tx-hash>
+#   bash scripts/indexer portfolio <address> [chain]
+#   bash scripts/indexer label <address>
+#   bash scripts/indexer verify <address> [chain]
 #
 # Prerequisites: jq, curl, cast (from Foundry)
 
