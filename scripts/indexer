@@ -17,6 +17,40 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 NETWORKS_FILE="$ROOT_DIR/assets/networks.json"
 TOKENS_FILE="$ROOT_DIR/assets/tokens.json"
 
+# --- resolve jq (must work even if not on PATH) ---
+# Look for jq in order: $JQ env, then PATH, then project root / scripts dir.
+if [ -n "${JQ:-}" ] && [ -x "$JQ" ]; then
+    : # use provided
+elif command -v jq >/dev/null 2>&1; then
+    JQ="$(command -v jq)"
+else
+    for cand in "$ROOT_DIR/jq" "$ROOT_DIR/jq.exe" "$SCRIPT_DIR/jq" "$SCRIPT_DIR/jq.exe"; do
+        if [ -x "$cand" ]; then JQ="$cand"; break; fi
+    done
+fi
+[ -z "${JQ:-}" ] && { echo -e "\033[0;31mERROR:\033[0m jq not found. Install: apt-get install jq / brew install jq / winget install jqlang.jq" >&2; exit 1; }
+
+# On Git Bash / WSL, jq.exe is a Windows binary that needs Windows-style paths.
+# Auto-detect: if $JQ ends in .exe, convert paths. Try cygpath first,
+# fall back to manual /mnt/c/ -> C:\ conversion (WSL).
+if [[ "$JQ" == *.exe ]]; then
+    if command -v cygpath >/dev/null 2>&1; then
+        NETWORKS_FILE="$(cygpath -w "$ROOT_DIR/assets/networks.json")"
+        TOKENS_FILE="$(cygpath -w "$ROOT_DIR/assets/tokens.json")"
+    else
+        # Manual /mnt/<drive>/<path> -> <Drive>:\<path> for WSL
+        for var in NETWORKS_FILE TOKENS_FILE; do
+            val="${!var}"
+            if [[ "$val" == /mnt/* ]]; then
+                drive="${val:5:1}"
+                rest="${val:6}"
+                rest="${rest//\//\\}"
+                eval "${var}=\"${drive^^}:${rest}\""
+            fi
+        done
+    fi
+fi
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -35,22 +69,22 @@ PRICE_CACHE_FILE="/tmp/pharos_indexer_prices"
 
 die() { echo -e "${RED}ERROR:${NC} $*" >&2; exit 1; }
 info() { echo -e "${CYAN}->${NC} $*"; }
-total_chains() { jq '.networks | length' "$NETWORKS_FILE"; }
+total_chains() { "$JQ" '.networks | length' "$NETWORKS_FILE"; }
 scope_str() { if [ "$ALL_CHAINS" = "true" ]; then echo "all $(total_chains) chains"; else echo "top 15 of $(total_chains) chains (pass --all for all)"; fi; }
 
 get_rpcs() {
     if [ "$ALL_CHAINS" = "true" ]; then
-        jq -r '.networks[] | select(.rpcUrl != null and .rpcUrl != "") | "\(.name)|\(.rpcUrl)|\(.chainId)|\(.nativeToken)|\(.type)"' "$NETWORKS_FILE"
+        "$JQ" -r '.networks[] | select(.rpcUrl != null and .rpcUrl != "") | "\(.name)|\(.rpcUrl)|\(.chainId)|\(.nativeToken)|\(.type)"' "$NETWORKS_FILE"
     else
-        jq -r '.networks[0:15][] | select(.rpcUrl != null and .rpcUrl != "") | "\(.name)|\(.rpcUrl)|\(.chainId)|\(.nativeToken)|\(.type)"' "$NETWORKS_FILE"
+        "$JQ" -r '.networks[0:15][] | select(.rpcUrl != null and .rpcUrl != "") | "\(.name)|\(.rpcUrl)|\(.chainId)|\(.nativeToken)|\(.type)"' "$NETWORKS_FILE"
     fi
 }
 
 get_explorers() {
     if [ "$ALL_CHAINS" = "true" ]; then
-        jq -r '.networks[] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
+        "$JQ" -r '.networks[] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
     else
-        jq -r '.networks[0:15][] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
+        "$JQ" -r '.networks[0:15][] | select(.explorerApiUrl != null and .explorerApiUrl != "") | "\(.name)|\(.explorerApiUrl)|\(.explorerUrl)|\(.type)"' "$NETWORKS_FILE"
     fi
 }
 
@@ -58,7 +92,7 @@ get_explorers() {
 get_usd_price() {
     local symbol="$1"
     local cg_id
-    cg_id=$(jq -r --arg sym "$symbol" '.tokens[$sym].cg_id // "null"' "$ROOT_DIR/assets/priceFeeds.json" 2>/dev/null)
+    cg_id=$("$JQ" -r --arg sym "$symbol" '.tokens[$sym].cg_id // "null"' "$ROOT_DIR/assets/priceFeeds.json" 2>/dev/null)
 
     if [ "$cg_id" = "null" ] || [ -z "$cg_id" ]; then echo "N/A"; return; fi
 
@@ -79,7 +113,7 @@ get_usd_price() {
     local price resp
     resp=$(curl -s --connect-timeout 8 --max-time 12 \
         "https://api.coingecko.com/api/v3/simple/price?ids=${cg_id}&vs_currencies=usd" 2>/dev/null) || true
-    price=$(echo "$resp" | jq -r ".[\"${cg_id}\"].usd // \"N/A\"" 2>/dev/null)
+    price=$(echo "$resp" | "$JQ" -r ".[\"${cg_id}\"].usd // \"N/A\"" 2>/dev/null)
 
     if [ "$price" != "N/A" ] && [ "$price" != "null" ] && [ -n "$price" ]; then
         echo "${symbol}=${price}|$(date +%s)" >> "$PRICE_CACHE_FILE"
@@ -137,7 +171,7 @@ cmd_balance() {
                     --data "{\"jsonrpc\":\"2.0\",\"method\":\"getBalance\",\"params\":[\"$addr\"],\"id\":1}" \
                     --connect-timeout 10 --max-time 15 "$rpc" 2>/dev/null) || true
                 local sol_value
-                sol_value=$(echo "$sol_resp" | jq -r '.result.value // -1' 2>/dev/null)
+                sol_value=$(echo "$sol_resp" | "$JQ" -r '.result.value // -1' 2>/dev/null)
                 if [ "$sol_value" != "-1" ] && [ -n "$sol_value" ]; then
                     result=$(python3 -c "print(round(int($sol_value) / 1e9, 6))" 2>/dev/null || echo "0")
                 else result=""; fi
@@ -153,28 +187,28 @@ cmd_balance() {
                 local tron_resp
                 tron_resp=$(curl -s "${rpc}?address=${addr}" --connect-timeout 10 2>/dev/null) || true
                 local tron_bal
-                tron_bal=$(echo "$tron_resp" | jq -r '.balance // 0' 2>/dev/null)
+                tron_bal=$(echo "$tron_resp" | "$JQ" -r '.balance // 0' 2>/dev/null)
                 result=$(python3 -c "print(int($tron_bal) / 1e6)" 2>/dev/null || echo "0")
                 ;;
             near)
                 local near_resp
                 near_resp=$(curl -s "${rpc}/${addr}" --connect-timeout 10 2>/dev/null) || true
                 local near_bal
-                near_bal=$(echo "$near_resp" | jq -r '.account[0].amount // 0' 2>/dev/null)
+                near_bal=$(echo "$near_resp" | "$JQ" -r '.account[0].amount // 0' 2>/dev/null)
                 result=$(python3 -c "print(int('$near_bal') / 1e24)" 2>/dev/null || echo "0")
                 ;;
             cosmos)
                 local cosmos_resp
                 cosmos_resp=$(curl -s "${rpc}/${addr}" --connect-timeout 10 2>/dev/null) || true
                 local cosmos_bal
-                cosmos_bal=$(echo "$cosmos_resp" | jq -r '.balances[] | select(.denom==\"uatom\") | .amount // 0' 2>/dev/null)
+                cosmos_bal=$(echo "$cosmos_resp" | "$JQ" -r '.balances[] | select(.denom==\"uatom\") | .amount // 0' 2>/dev/null)
                 result=$(python3 -c "print(int('$cosmos_bal') / 1e6)" 2>/dev/null || echo "0")
                 ;;
             dogecoin)
                 local doge_resp
                 doge_resp=$(curl -s "${rpc}/${addr}" --connect-timeout 10 2>/dev/null) || true
                 local doge_bal
-                doge_bal=$(echo "$doge_resp" | jq -r '.balance // 0' 2>/dev/null)
+                doge_bal=$(echo "$doge_resp" | "$JQ" -r '.balance // 0' 2>/dev/null)
                 result=$(python3 -c "print(int('$doge_bal') / 1e8)" 2>/dev/null || echo "0")
                 ;;
             polkadot)
@@ -182,14 +216,14 @@ cmd_balance() {
                 dot_resp=$(curl -s -X POST "${rpc}" -H 'Content-Type: application/json' \
                     -d "{\"address\":\"${addr}\"}" --connect-timeout 10 2>/dev/null) || true
                 local dot_bal
-                dot_bal=$(echo "$dot_resp" | jq -r '.data.balance // 0' 2>/dev/null)
+                dot_bal=$(echo "$dot_resp" | "$JQ" -r '.data.balance // 0' 2>/dev/null)
                 result=$(python3 -c "print(int('$dot_bal') / 1e10)" 2>/dev/null || echo "0")
                 ;;
             ton)
                 local ton_resp
                 ton_resp=$(curl -s "${rpc}?address=${addr}" --connect-timeout 10 2>/dev/null) || true
                 local ton_bal
-                ton_bal=$(echo "$ton_resp" | jq -r '.result.balance // 0' 2>/dev/null)
+                ton_bal=$(echo "$ton_resp" | "$JQ" -r '.result.balance // 0' 2>/dev/null)
                 result=$(python3 -c "print(int('$ton_bal') / 1e9)" 2>/dev/null || echo "0")
                 ;;
             *)
@@ -201,7 +235,7 @@ cmd_balance() {
                         --data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"$addr\",\"latest\"],\"id\":1}" \
                         "$rpc" 2>/dev/null) || true
                     local wei_hex
-                    wei_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+                    wei_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
                     result=$(python3 -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0")
                 fi
                 ;;
@@ -246,7 +280,7 @@ cmd_balance() {
     json_results+="]"
 
     if [ "$JSON_OUTPUT" = "true" ]; then
-        echo "$json_results" | jq .
+        echo "$json_results" | "$JQ" .
     else
         echo ""
         if [ $found -eq 0 ]; then
@@ -284,10 +318,10 @@ cmd_tx() {
         fi
 
         local status
-        status=$(echo "$resp" | jq -r '.result.status // .status // "0"' 2>/dev/null)
+        status=$(echo "$resp" | "$JQ" -r '.result.status // .status // "0"' 2>/dev/null)
         if [ "$status" = "1" ] || [ "$status" = "0x1" ]; then
             local block
-            block=$(echo "$resp" | jq -r '.result.blockNumber // "?"' 2>/dev/null)
+            block=$(echo "$resp" | "$JQ" -r '.result.blockNumber // "?"' 2>/dev/null)
             printf '%s\n' "  ${GREEN}[OK] Found on $chain${NC} -- block ${block}"
             printf '%s\n' "    Explorer: ${explorerUrl}/tx/${txhash}"
             found=$((found + 1))
@@ -334,7 +368,7 @@ cmd_portfolio() {
                 --data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"$addr\",\"latest\"],\"id\":1}" \
                 "$rpc" 2>/dev/null) || true
             local wei_hex
-            wei_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+            wei_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
             native_bal=$(python3 -c "print(round(int('$wei_hex', 16) / 1e18, 4))" 2>/dev/null || echo "")
         fi
         if [ -n "$native_bal" ] && [ "$native_bal" != "0" ] && [ "$native_bal" != "0.0" ]; then
@@ -343,7 +377,7 @@ cmd_portfolio() {
 
         # ERC-20 tokens (from tokens.json)
         local tokens
-        tokens=$(jq -r --arg ch "$chain" '.[$ch] // [] | .[] | "\(.symbol)|\(.address)|\(.decimals)"' "$TOKENS_FILE" 2>/dev/null) || true
+        tokens=$("$JQ" -r --arg ch "$chain" '.[$ch] // [] | .[] | "\(.symbol)|\(.address)|\(.decimals)"' "$TOKENS_FILE" 2>/dev/null) || true
         if [ -n "$tokens" ]; then
             while IFS='|' read -r symbol tokenAddr decimals; do
                 [ -z "$symbol" ] && continue
@@ -391,10 +425,10 @@ cmd_label() {
             local resp
             resp=$(curl -s "${apiUrl}/social/label/${addr}" 2>/dev/null) || true
             local label
-            label=$(echo "$resp" | jq -r '.label // empty' 2>/dev/null)
+            label=$(echo "$resp" | "$JQ" -r '.label // empty' 2>/dev/null)
             if [ -n "$label" ]; then
                 local cat
-                cat=$(echo "$resp" | jq -r '.category // ""' 2>/dev/null)
+                cat=$(echo "$resp" | "$JQ" -r '.category // ""' 2>/dev/null)
                 echo -e "  ${GREEN}${label}${NC} [${cat}] - ${chain} (PharosScan social)"
                 found=$((found + 1))
             fi
@@ -403,7 +437,7 @@ cmd_label() {
             local resp
             resp=$(curl -s "${apiUrl}?module=contract&action=getsourcecode&address=${addr}" 2>/dev/null) || true
             local contractName
-            contractName=$(echo "$resp" | jq -r '.result[0].ContractName // empty' 2>/dev/null)
+            contractName=$(echo "$resp" | "$JQ" -r '.result[0].ContractName // empty' 2>/dev/null)
             if [ -n "$contractName" ]; then
                 echo -e "  ${GREEN}${contractName}${NC} [verified contract] - ${chain} (${ctype})"
                 found=$((found + 1))
@@ -447,7 +481,7 @@ cmd_verify() {
             continue
         fi
         local verified
-        verified=$(echo "$resp" | jq -r '.result[0].SourceCode // empty' 2>/dev/null)
+        verified=$(echo "$resp" | "$JQ" -r '.result[0].SourceCode // empty' 2>/dev/null)
         if [ -n "$verified" ] && [ "$verified" != "null" ] && [ "$verified" != "" ]; then
             echo -e "  ${GREEN}[OK] Verified on $chain${NC}"
             echo "    View source: ${explorerUrl}/address/${addr}#code"
@@ -486,7 +520,7 @@ cmd_health() {
         resp=$(curl -s -X POST -H "Content-Type: application/json" \
             --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
             --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
-        block_num=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+        block_num=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
         
         if [ -n "$block_num" ] && [ "$block_num" != "0x0" ] && [ "$block_num" != "null" ]; then
             local dec_block
@@ -513,7 +547,7 @@ cmd_health() {
     results_json+="]"
     
     if [ "$JSON_OUTPUT" = "true" ]; then
-        echo "$results_json" | jq .
+        echo "$results_json" | "$JQ" .
     else
         echo ""
     fi
@@ -543,7 +577,7 @@ cmd_gas() {
         resp=$(curl -s -X POST -H "Content-Type: application/json" \
             --data '{"jsonrpc":"2.0","method":"eth_gasPrice","params":[],"id":1}' \
             --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
-        gas_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+        gas_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
         
         if [ -n "$gas_hex" ] && [ "$gas_hex" != "0x0" ] && [ "$gas_hex" != "null" ]; then
             gas_gwei=$(python3 -c "print(round(int('$gas_hex', 16) / 1e9, 2))" 2>/dev/null || echo "?")
@@ -567,7 +601,7 @@ cmd_gas() {
     json_results+="]"
 
     if [ "$JSON_OUTPUT" = "true" ]; then
-        echo "$json_results" | jq .
+        echo "$json_results" | "$JQ" .
     else
         echo ""
     fi
@@ -604,9 +638,9 @@ cmd_top() {
     while IFS='|' read -r chain rpc chainId nativeToken ctype; do
         # Find the token address for this chain
         local token_addr decimals
-        token_addr=$(jq -r --arg ch "$chain" --arg sym "$token_symbol" \
+        token_addr=$("$JQ" -r --arg ch "$chain" --arg sym "$token_symbol" \
             '.[$ch] // [] | .[] | select(.symbol == $sym) | .address' "$TOKENS_FILE" 2>/dev/null | head -1)
-        decimals=$(jq -r --arg ch "$chain" --arg sym "$token_symbol" \
+        decimals=$("$JQ" -r --arg ch "$chain" --arg sym "$token_symbol" \
             '.[$ch] // [] | .[] | select(.symbol == $sym) | .decimals' "$TOKENS_FILE" 2>/dev/null | head -1)
 
         if [ -z "$token_addr" ] || [ "$token_addr" = "null" ]; then
@@ -646,7 +680,7 @@ cmd_top() {
     rm -f "$tmpfile"
 
     if [ "$JSON_OUTPUT" = "true" ]; then
-        echo "$json_results" | jq .
+        echo "$json_results" | "$JQ" .
     else
         echo ""
     fi
@@ -682,14 +716,14 @@ cmd_suggest() {
                 --data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"$addr\",\"latest\"],\"id\":1}" \
                 --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
             local wei_hex
-            wei_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+            wei_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
             native_bal=$(python3 -c "print(round(int('$wei_hex', 16) / 1e18, 6))" 2>/dev/null || echo "0")
         fi
         echo "NATIVE|$chain|$nativeToken|$native_bal|$chainId|$rpc" >> "$tmpfile"
 
         # Check USDC for this chain
         local usdc_addr
-        usdc_addr=$(jq -r --arg ch "$chain" '.[$ch] // [] | .[] | select(.symbol == "USDC") | .address' "$TOKENS_FILE" 2>/dev/null | head -1)
+        usdc_addr=$("$JQ" -r --arg ch "$chain" '.[$ch] // [] | .[] | select(.symbol == "USDC") | .address' "$TOKENS_FILE" 2>/dev/null | head -1)
         if [ -n "$usdc_addr" ] && [ "$usdc_addr" != "null" ]; then
             local raw
             if command -v cast >/dev/null 2>&1; then
@@ -711,7 +745,7 @@ cmd_suggest() {
         resp=$(curl -s -X POST -H "Content-Type: application/json" \
             --data '{"jsonrpc":"2.0","method":"eth_gasPrice","params":[],"id":1}' \
             --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
-        gas_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
+        gas_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
         if [ -n "$gas_hex" ] && [ "$gas_hex" != "0x0" ]; then
             local gwei
             gwei=$(python3 -c "print(round(int('$gas_hex', 16) / 1e9, 2))" 2>/dev/null || echo "999")

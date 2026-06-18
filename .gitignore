@@ -12,3 +12,9 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Local tool binaries (used as fallback when not on PATH)
+jq
+jq.exe
+scripts/jq
+scripts/jq.exe
