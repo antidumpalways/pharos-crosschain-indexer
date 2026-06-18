@@ -19,6 +19,120 @@
       "name": "pacific-mainnet"
     },
     {
+      "name": "ethereum",
+      "rpcUrl": "https://eth.drpc.org",
+      "chainId": 1,
+      "nativeToken": "ETH",
+      "type": "etherscan",
+      "explorerUrl": "https://etherscan.io/",
+      "explorerApiUrl": "https://api.etherscan.io/api"
+    },
+    {
+      "name": "base",
+      "rpcUrl": "https://base.drpc.org",
+      "chainId": 8453,
+      "nativeToken": "ETH",
+      "type": "etherscan",
+      "explorerUrl": "https://basescan.org/",
+      "explorerApiUrl": "https://api.basescan.org/api"
+    },
+    {
+      "name": "arbitrum",
+      "rpcUrl": "https://arbitrum.drpc.org",
+      "chainId": 42161,
+      "nativeToken": "ETH",
+      "type": "etherscan",
+      "explorerUrl": "https://arbiscan.io/",
+      "explorerApiUrl": "https://api.arbiscan.io/api"
+    },
+    {
+      "name": "optimism",
+      "rpcUrl": "https://optimism.drpc.org",
+      "chainId": 10,
+      "nativeToken": "ETH",
+      "type": "etherscan",
+      "explorerUrl": "https://optimistic.etherscan.io/",
+      "explorerApiUrl": "https://api-optimistic.etherscan.io/api"
+    },
+    {
+      "name": "polygon",
+      "rpcUrl": "https://polygon.drpc.org",
+      "chainId": 137,
+      "nativeToken": "POL",
+      "type": "etherscan",
+      "explorerUrl": "https://polygonscan.com/",
+      "explorerApiUrl": "https://api.polygonscan.com/api"
+    },
+    {
+      "name": "bsc",
+      "rpcUrl": "https://bsc.drpc.org",
+      "chainId": 56,
+      "nativeToken": "BNB",
+      "type": "etherscan",
+      "explorerUrl": "https://bscscan.com/",
+      "explorerApiUrl": "https://api.bscscan.com/api"
+    },
+    {
+      "name": "avalanche",
+      "rpcUrl": "https://avalanche.drpc.org",
+      "chainId": 43114,
+      "nativeToken": "AVAX",
+      "type": "etherscan",
+      "explorerUrl": "https://snowtrace.io/",
+      "explorerApiUrl": "https://api.snowtrace.io/api"
+    },
+    {
+      "name": "solana",
+      "rpcUrl": "https://api.mainnet-beta.solana.com",
+      "chainId": 0,
+      "explorerUrl": "https://solscan.io/",
+      "nativeToken": "SOL",
+      "type": "solana"
+    },
+    {
+      "name": "near",
+      "rpcUrl": "https://api.nearblocks.io/v1/account",
+      "chainId": 0,
+      "explorerUrl": "https://nearblocks.io/",
+      "nativeToken": "NEAR",
+      "type": "near"
+    },
+    {
+      "name": "zksync",
+      "rpcUrl": "https://zksync.drpc.org",
+      "chainId": 324,
+      "nativeToken": "ETH",
+      "type": "etherscan",
+      "explorerUrl": "https://explorer.zksync.io/"
+    },
+    {
+      "name": "linea",
+      "rpcUrl": "https://linea.drpc.org",
+      "chainId": 59144,
+      "nativeToken": "ETH",
+      "type": "etherscan",
+      "explorerUrl": "https://lineascan.build/",
+      "explorerApiUrl": "https://api.lineascan.build/api"
+    },
+    {
+      "name": "fantom",
+      "rpcUrl": "https://fantom.drpc.org",
+      "chainId": 250,
+      "nativeToken": "FTM",
+      "type": "etherscan",
+      "explorerUrl": "https://ftmscan.com/",
+      "explorerApiUrl": "https://api.ftmscan.com/api"
+    },
+    {
+      "name": "gnosis",
+      "rpcUrl": "https://gnosis.drpc.org",
+      "chainId": 100,
+      "nativeToken": "XDAI",
+      "type": "etherscan",
+      "explorerUrl": "https://gnosisscan.io/",
+      "explorerApiUrl": "https://api.gnosisscan.io/api"
+    },
+    {
       "rpcUrl": "https://ethereum-sepolia-rpc.publicnode.com",
       "chainId": 11155111,
       "explorerUrl": "https://sepolia.etherscan.io/",
@@ -134,104 +248,6 @@
       "nativeToken": "ETH",
       "type": "zksync",
       "name": "zksync-sepolia"
-    },
-    {
-      "name": "ethereum",
-      "rpcUrl": "https://eth.drpc.org",
-      "chainId": 1,
-      "nativeToken": "ETH",
-      "type": "etherscan",
-      "explorerUrl": "https://etherscan.io/",
-      "explorerApiUrl": "https://api.etherscan.io/api"
-    },
-    {
-      "name": "bsc",
-      "rpcUrl": "https://bsc.drpc.org",
-      "chainId": 56,
-      "nativeToken": "BNB",
-      "type": "etherscan",
-      "explorerUrl": "https://bscscan.com/",
-      "explorerApiUrl": "https://api.bscscan.com/api"
-    },
-    {
-      "name": "polygon",
-      "rpcUrl": "https://polygon.drpc.org",
-      "chainId": 137,
-      "nativeToken": "POL",
-      "type": "etherscan",
-      "explorerUrl": "https://polygonscan.com/",
-      "explorerApiUrl": "https://api.polygonscan.com/api"
-    },
-    {
-      "name": "arbitrum",
-      "rpcUrl": "https://arbitrum.drpc.org",
-      "chainId": 42161,
-      "nativeToken": "ETH",
-      "type": "etherscan",
-      "explorerUrl": "https://arbiscan.io/",
-      "explorerApiUrl": "https://api.arbiscan.io/api"
-    },
-    {
-      "name": "optimism",
-      "rpcUrl": "https://optimism.drpc.org",
-      "chainId": 10,
-      "nativeToken": "ETH",
-      "type": "etherscan",
-      "explorerUrl": "https://optimistic.etherscan.io/",
-      "explorerApiUrl": "https://api-optimistic.etherscan.io/api"
-    },
-    {
-      "name": "zksync",
-      "rpcUrl": "https://zksync.drpc.org",
-      "chainId": 324,
-      "nativeToken": "ETH",
-      "type": "etherscan",
-      "explorerUrl": "https://explorer.zksync.io/"
-    },
-    {
-      "name": "linea",
-      "rpcUrl": "https://linea.drpc.org",
-      "chainId": 59144,
-      "nativeToken": "ETH",
-      "type": "etherscan",
-      "explorerUrl": "https://lineascan.build/",
-      "explorerApiUrl": "https://api.lineascan.build/api"
-    },
-    {
-      "name": "base",
-      "rpcUrl": "https://base.drpc.org",
-      "chainId": 8453,
-      "nativeToken": "ETH",
-      "type": "etherscan",
-      "explorerUrl": "https://basescan.org/",
-      "explorerApiUrl": "https://api.basescan.org/api"
-    },
-    {
-      "name": "fantom",
-      "rpcUrl": "https://fantom.drpc.org",
-      "chainId": 250,
-      "nativeToken": "FTM",
-      "type": "etherscan",
-      "explorerUrl": "https://ftmscan.com/",
-      "explorerApiUrl": "https://api.ftmscan.com/api"
-    },
-    {
-      "name": "avalanche",
-      "rpcUrl": "https://avalanche.drpc.org",
-      "chainId": 43114,
-      "nativeToken": "AVAX",
-      "type": "etherscan",
-      "explorerUrl": "https://snowtrace.io/",
-      "explorerApiUrl": "https://api.snowtrace.io/api"
-    },
-    {
-      "name": "gnosis",
-      "rpcUrl": "https://gnosis.drpc.org",
-      "chainId": 100,
-      "nativeToken": "XDAI",
-      "type": "etherscan",
-      "explorerUrl": "https://gnosisscan.io/",
-      "explorerApiUrl": "https://api.gnosisscan.io/api"
     },
     {
       "name": "scroll",
@@ -847,22 +863,6 @@
       "chainId": 999,
       "nativeToken": "HYPE",
       "type": "etherscan"
-    },
-    {
-      "name": "near",
-      "rpcUrl": "https://api.nearblocks.io/v1/account",
-      "chainId": 0,
-      "explorerUrl": "https://nearblocks.io/",
-      "nativeToken": "NEAR",
-      "type": "near"
-    },
-    {
-      "name": "solana",
-      "rpcUrl": "https://api.mainnet-beta.solana.com",
-      "chainId": 0,
-      "explorerUrl": "https://solscan.io/",
-      "nativeToken": "SOL",
-      "type": "solana"
     }
   ],
   "defaultNetwork": "atlantic-testnet"
