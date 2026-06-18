@@ -128,6 +128,12 @@ get_usd_price() {
     price=$(echo "$resp" | "$JQ" -r ".[\"${cg_id}\"].usd // \"N/A\"" 2>/dev/null)
 
     if [ "$price" != "N/A" ] && [ "$price" != "null" ] && [ -n "$price" ]; then
+        # Dedupe: remove any existing entry for this symbol, then append fresh.
+        # This keeps the cache file at exactly one row per symbol.
+        if [ -f "$PRICE_CACHE_FILE" ]; then
+            grep -v "^${symbol}=" "$PRICE_CACHE_FILE" > "${PRICE_CACHE_FILE}.tmp" 2>/dev/null || true
+            mv "${PRICE_CACHE_FILE}.tmp" "$PRICE_CACHE_FILE"
+        fi
         echo "${symbol}=${price}|$(date +%s)" >> "$PRICE_CACHE_FILE"
         echo "$price"; return
     fi
