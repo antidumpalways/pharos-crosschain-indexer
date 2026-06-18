@@ -303,6 +303,30 @@ cmd_balance() {
 
 # --- tx lookup ---
 
+# eth_getTransactionByHash on a free public RPC. Returns:
+#   "chain_id|chain_name|block_hex|from_addr|to_addr|value_hex|nonce_hex|gas_hex|input_hex"  on match
+#   "" on miss / network error
+rpc_get_tx() {
+    local rpc="$1" txhash="$2" chain_id="$3" chain_name="$4"
+    local resp
+    resp=$(curl -s -X POST -H "Content-Type: application/json" \
+        --data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getTransactionByHash\",\"params\":[\"$txhash\"],\"id\":1}" \
+        --connect-timeout 8 --max-time 12 "$rpc" 2>/dev/null) || true
+    # safe extraction: only access fields when .result is an object, otherwise null
+    local result_type
+    result_type=$(echo "$resp" | "$JQ" -r '.result | type' 2>/dev/null)
+    if [ "$result_type" != "object" ]; then return 1; fi
+    local block_hash
+    block_hash=$(echo "$resp" | "$JQ" -r '.result.blockHash // ""' 2>/dev/null)
+    [ -z "$block_hash" ] || [ "$block_hash" = "null" ] && return 1
+    local block_num from_addr to_addr value_hex
+    block_num=$(echo "$resp" | "$JQ" -r '.result.blockNumber // "?"' 2>/dev/null)
+    from_addr=$(echo "$resp" | "$JQ" -r '.result.from // "?"' 2>/dev/null)
+    to_addr=$(echo "$resp" | "$JQ" -r '.result.to // "?"' 2>/dev/null)
+    value_hex=$(echo "$resp" | "$JQ" -r '.result.value // "0x0"' 2>/dev/null)
+    echo "${chain_id}|${chain_name}|${block_num}|${from_addr}|${to_addr}|${value_hex}"
+}
+
 cmd_tx() {
     local txhash="${1:-}"
 
@@ -321,29 +345,44 @@ cmd_tx() {
     echo ""
 
     local found=0
-    while IFS='|' read -r chain apiUrl explorerUrl ctype; do
-        local resp
-        if [ "$ctype" = "pharos" ] || [ "$ctype" = "etherscan" ]; then
-            resp=$(curl -s "${apiUrl}?module=transaction&action=gettxinfo&txhash=${txhash}" 2>/dev/null) || true
-        else
-            resp=$(curl -s "${apiUrl}?module=proxy&action=eth_getTransactionByHash&txhash=${txhash}" 2>/dev/null) || true
-        fi
+    local scope_note=""
+    [ "$ALL_CHAINS" = "true" ] && scope_note=" (all chains)" || scope_note=" (top 15 — pass --all for all)"
+    printf "  Scope:%s\n" "$scope_note"
 
-        local status
-        status=$(echo "$resp" | "$JQ" -r '.result.status // .status // "0"' 2>/dev/null)
-        if [ "$status" = "1" ] || [ "$status" = "0x1" ]; then
-            local block
-            block=$(echo "$resp" | "$JQ" -r '.result.blockNumber // "?"' 2>/dev/null)
-            printf '%s\n' "  ${GREEN}[OK] Found on $chain${NC} -- block ${block}"
-            printf '%s\n' "    Explorer: ${explorerUrl}/tx/${txhash}"
+    # Direct RPC eth_getTransactionByHash on every EVM chain. Free, no API key,
+    # no rate limit on public nodes, and works even when the explorer API is
+    # down or has deprecated (Etherscan V1 -> V2 migration). Skips non-EVM
+    # (Solana, Near) and chains without an RPC.
+    while IFS='|' read -r chain rpc chainId nativeToken ctype; do
+        [ -z "$rpc" ] && continue
+        local line
+        line=$(rpc_get_tx "$rpc" "$txhash" "$chainId" "$chain" || true)
+        if [ -n "$line" ]; then
+            local f_chainId f_chain f_block f_from f_to f_value
+            IFS='|' read -r f_chainId f_chain f_block f_from f_to f_value <<< "$line"
+            # value in ether (for native only, may be 0 for ERC20 tx)
+            local value_eth
+            value_eth=$(printf "%d" "${f_value}" 2>/dev/null | awk '{printf "%.6f", $1/1e18}' 2>/dev/null || echo "?")
+            printf '%s\n' "  ${GREEN}[OK] Found on $f_chain${NC} (chainId $f_chainId) -- block $f_block"
+            printf '%s\n' "    From:  $f_from"
+            printf '%s\n' "    To:    $f_to"
+            printf '%s\n' "    Value: $value_eth $nativeToken"
+            # Try to construct an explorer link if we have a known explorer for this chain
+            local exp
+            exp=$(get_explorers | awk -F'|' -v c="$f_chain" '$1==c {print $3; exit}')
+            if [ -n "$exp" ]; then
+                # strip trailing slash to avoid double-slash in URL
+                exp="${exp%/}"
+                printf '%s\n' "    Explorer: ${exp}/tx/${txhash}"
+            fi
             found=$((found + 1))
             break
         fi
-    done < <(get_explorers)
+    done < <(get_rpcs)
 
     if [ $found -eq 0 ]; then
-        echo "  Transaction not found on any indexed chain."
-        printf '%s\n' "  It may still be pending, or on a chain not in networks.json"
+        echo "  Transaction not found on any indexed EVM chain."
+        printf '%s\n' "  It may still be pending, on a non-EVM chain (Solana/Near), or on a chain not in networks.json"
     fi
     echo ""
 }
