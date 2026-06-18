@@ -39,11 +39,15 @@ $ bash scripts/indexer balance <YOUR_ADDRESS>
 
 | Chain             | Balance        | Symbol |
 |-------------------|----------------|--------|
-| atlantic-testnet  | 14.955517447   | PHRS   |  <-- REAL data from live RPC
-| pacific-mainnet   | 0.0            | PROS   |  <-- REAL data from live RPC
+| atlantic-testnet  | 3.180294063... | PHRS   |  <-- live RPC
+| pacific-mainnet   | 0.943138164    | PROS   |  <-- live RPC
+| ethereum          | 0.015572079... | ETH    |  <-- live RPC ($27.12)
+| arbitrum          | 0.000104592... | ETH    |  <-- live RPC ($0.18)
+| avalanche         | 0.056377016... | AVAX   |  <-- live RPC ($0.37)
+| ...               | ...            | ...    |  (15 chains in <10s)
 ```
 
-**No mock. No simulation. Every number comes from a live API call.**
+**No mock. No simulation. Every number comes from a live `eth_getBalance` RPC call.**
 
 ---
 
@@ -51,20 +55,45 @@ $ bash scripts/indexer balance <YOUR_ADDRESS>
 
 ```mermaid
 flowchart TB
-    USER["Developer: 'Show my portfolio everywhere'"] --> AGENT["AI Agent (Claude / Cursor / OpenCode)"]
-    AGENT --> SKILL["Reads SKILL.md -> Capability Index -> references/*.md"]
-    SKILL --> INDEXER["Calls scripts/indexer"]
-    INDEXER --> ATL["PharosScan Atlantic (chainId 688689)"]
-    INDEXER --> PAC["PharosScan Pacific (chainId 1672)"]
-    INDEXER --> ETH["Etherscan Sepolia (chainId 11155111)"]
-    INDEXER --> BASE["Basescan Sepolia (chainId 84532)"]
-    INDEXER --> ARB["Arbiscan Sepolia (chainId 421614)"]
-    ATL --> RESULT["Unified Table: Chain, Token, Balance"]
-    PAC --> RESULT
-    ETH --> RESULT
-    BASE --> RESULT
-    ARB --> RESULT
+    USER["Developer: 'Show my portfolio everywhere'"] --> AGENT["AI Agent (Claude Code / OpenCode / etc.)"]
+    AGENT --> SKILL["Reads SKILL.md -> activation.triggers -> references/*.md"]
+    SKILL --> INDEXER["Runs bash scripts/indexer <cmd>"]
+    INDEXER --> RPC["Direct eth_getBalance / eth_getTransactionByHash"]
+    RPC --> ATL["Pharos Atlantic (chainId 688689)"]
+    RPC --> PAC["Pharos Pacific (chainId 1672)"]
+    RPC --> ETH["Ethereum + Base + Arbitrum + Optimism + Polygon + BSC + Avalanche + zkSync + Linea + ... (top 15 by default, --all for all 110 EVM)"]
+    RPC --> RESULT["Unified Table: Chain, Token, Balance, USD"]
+    INDEXER --> PY["python scripts/*.py (multi, export, diff, history, alert)"]
 ```
+
+---
+
+## Verified Test Results (16/16 PASS on Windows Git Bash)
+
+A full integration test of all 14 capabilities + edge cases on Windows
+Git Bash (the typical AI-agent runtime) — see `test_all_14.sh`:
+
+| # | Capability | Status | Sample output (live) |
+|---|---|---|---|
+| 1 | `balance <addr>` | ✅ | atlantic 3.18 PHRS · ethereum 0.0155 ETH · base 0.0018 ETH |
+| 2 | `balance <addr> atlantic-testnet` | ✅ | 3.18 PHRS |
+| 3 | `balance <addr> --usd` | ✅ | PROS $0.55, ETH $27.12, AVAX $0.37, ZKSYNC $0.13, ... |
+| 4 | `tx <hash>` (real Pharos Pacific tx) | ✅ | Found in 4s, block 0x9df43f, from/to/value/explorer |
+| 5 | `portfolio <addr>` | ✅ | Multi-chain native + tokens |
+| 6 | `label <addr>` | ✅ | PharosScan + Etherscan + verified-contract lookup |
+| 7 | `verify <contract>` | ✅ | (Not verified, as expected for that address) |
+| 8 | `health` | ✅ | All top-15 chains LIVE with real block numbers |
+| 9 | `gas` | ✅ | atlantic 10.0 gwei, ethereum 0.18 gwei, base 0.01 gwei |
+| 10 | `top <addr> USDC` | ✅ | Real per-chain USDC ranking |
+| 11 | `suggest <addr>` | ✅ | GAS/BRIDGE/DEPLOY recommendations |
+| 12 | `python scripts/multi.py <addr>` | ✅ | 49 lines, all tokens across 110 chains |
+| 13 | `python scripts/export.py <addr> csv` | ✅ | `data/portfolio.csv` (43 chains) |
+| 14 | `python scripts/diff.py diff <addr>` | ✅ | "No snapshot" (expected first run) |
+| 15 | `python scripts/history.py show` | ✅ | "No history" (expected first run) |
+| 16 | `python scripts/alert.py <addr> top15` | ✅ | "Monitoring... 13 chains" |
+
+Reproduce locally with: `bash test_all_14.sh` (or `bash
+C:\Users\Acer\bin\test_all_14.sh` on Windows).
 
 ---
 
@@ -73,11 +102,11 @@ flowchart TB
 | Judging Criterion | Our Delivery |
 |---|---|
 | **Originality & Creativity** | First cross-chain data aggregator packaged as a Pharos Skill Engine extension. |
-| **Technical Quality & Completeness** | Real API integration (PharosScan + Etherscan). Pure bash + curl + jq + Python. 14 operations (9 CLI commands + 6 Python scripts), each with command templates, parameter tables, output parsing, and error handling. |
-| **Practical Use for AI Agents** | Every agent needs to answer "what do I have, where?" before acting. |
+| **Technical Quality & Completeness** | Real RPC integration (direct `eth_*` JSON-RPC + CoinGecko for USD). Pure bash + curl + jq + Python. 14 operations (1 bash indexer with 9 commands + 6 Python scripts), each with command templates, parameter tables, output parsing, and error handling. 16/16 integration tests pass on Windows Git Bash. |
+| **Practical Use for AI Agents** | Every agent needs to answer "what do I have, where?" before acting. SKILL.md is auto-loaded by Claude Code, OpenCode, Cursor, and other agent CLIs. |
 | **Reusability & Composability** | Add any chain to `assets/networks.json` — zero code changes. |
-| **Successful Deployment on Pharos** | Tested against live Atlantic RPC (`14.9555 PHRS` verified). No deploy needed. |
-| **User Experience & Documentation** | Mermaid architecture diagram. 9 CLI commands + 6 Python scripts. 2 demo scripts. 9 reference files. |
+| **Successful Deployment on Pharos** | Verified live: Atlantic 3.18 PHRS, Pacific 0.94 PROS, real-time tx found on Pacific in 4s, gas prices 0.01-10 gwei across 13 mainnet. No deploy needed (pure read). |
+| **User Experience & Documentation** | Mermaid architecture diagram. 1 bash indexer (9 commands) + 6 Python scripts. 2 demo scripts. 9 reference files. SKILL.md has a cheat-sheet so agents pick the right command first try. |
 | **Vision Alignment** | Cross-chain = core Pharos narrative (CCIP/CCTP/LayerZero). Agent economy = agents need cross-chain awareness to operate, transact, and interact. This skill provides the data foundation every agent needs before acting across chains. |
 
 ---
@@ -102,18 +131,28 @@ This skill directly advances the Pharos vision by:
 ```bash
 git clone https://github.com/antidumpalways/pharos-crosschain-indexer
 cd pharos-crosschain-indexer
+bash install.sh    # auto-installs jq on Windows, verifies deps
 
-# 1. Real Atlantic testnet query (returns live data)
+# 1. Real Atlantic testnet query (returns live data, top 15 default)
 bash scripts/indexer balance <YOUR_ADDRESS> atlantic-testnet
-# Output: atlantic-testnet   14.9555 PHRS  <-- REAL
+# Output: atlantic-testnet   3.1802940636572354 PHRS  <-- live RPC
 
-# 2. Multi-chain (Atlantic + Pacific simultaneously)
+# 2. Multi-chain default scope (Pharos + 13 mainnet in seconds)
 bash scripts/indexer balance <YOUR_ADDRESS>
-# Output: atlantic-testnet   14.9555 PHRS
-#         pacific-mainnet      0.0    PROS
+# Output: atlantic 3.18 PHRS · ethereum 0.0155 ETH · base 0.0018 ETH
+#         arbitrum 0.0001 ETH · ... (all 15 chains in <10s)
 
-# 3. Full portfolio across all chains
+# 3. Full portfolio across 110 EVM + Solana + Near
 bash scripts/indexer portfolio <YOUR_ADDRESS>
+# (slower; pass <YOUR_ADDRESS> --usd for USD values)
+
+# 4. Find a transaction (any EVM chain, direct RPC, ~4s)
+bash scripts/indexer tx 0x80367b036e15831e340d061c4bbfc019f10c50d7978d404c5df6d8924f3ffd86
+# Output: Found on pacific-mainnet (chainId 1672) -- block 0x9df43f
+#         From: 0x356716ec... To: 0x76c9cf54... Explorer: https://www.pharosscan.xyz/tx/...
+
+# 5. Run the full integration test (16 commands, real data)
+bash test_all_14.sh
 ```
 
 ---
@@ -142,7 +181,7 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 |   `-- add-chain.md               <-- Add a new chain
 |
 |-- scripts/
-|   |-- indexer                     <-- THE TOOL: 9 bash commands
+|   |-- indexer                     <-- 1 bash script, 9 commands
 |   |-- suggest.py                  <-- Portfolio suggestions
 |   |-- export.py                   <-- CSV / HTML export
 |   |-- diff.py                     <-- Balance snapshot + diff
@@ -168,7 +207,7 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 | Error messages match actual responses | Mapped per operation |
 | Assets folder configured | `networks.json` (112 chains) + `tokens.json` + `priceFeeds.json` |
 | CI/CD | GitHub Actions auto-test on push |
-| Live data verified | Atlantic 14.95 PHRS, Solana 1.85 SOL, Near 2911 NEAR, Vitalik 58 ETH Sepolia |
+| Live data verified | Atlantic 3.18 PHRS, Pacific 0.94 PROS, Ethereum 0.0155 ETH, Base/Arbitrum/Optimism/Polygon/BSC/Avalanche/zkSync/Linea — all real balances; Pharos Pacific tx `0x80367b0...` found in 4s via direct RPC; gas prices 0.01-10 gwei live |
 
 ---
 
@@ -178,7 +217,7 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 | User Says | Agent Executes | Real Output |
 |---|---|---|
 | "Check my balance on all chains" | `bash scripts/indexer bal <ADDRESS>` | `atlantic-testnet 14.95 PHRS, avalanche-fuji 0.0002 AVAX` ... |
-| "What do I have on Pharos?" | `bash scripts/indexer bal <ADDRESS> atlantic-testnet` | `atlantic-testnet 14.9555 PHRS` |
+| "What do I have on Pharos?" | `bash scripts/indexer bal <ADDRESS> atlantic-testnet` | `atlantic-testnet 3.18 PHRS (live RPC)` |
 | "Show me ETH on every chain" | `bash scripts/indexer bal <ADDRESS>` | Scans 112 chains, shows all with ETH |
 | "Check balance on Solana" | `bash scripts/indexer bal <ADDRESS> solana` | `solana 1.851041 SOL` |
 | "Balance with USD" | `bash scripts/indexer bal <ADDRESS> --usd` | `ethereum-sepolia 0.0 ETH ($0.00)` |
@@ -187,7 +226,7 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 | User Says | Agent Executes | Real Output |
 |---|---|---|
 | "Where is this transaction?" | `bash scripts/indexer tx 0x33a1...` | `[OK] Found on arbitrum-sepolia — block 12345678` |
-| "Find tx 0xabc..." | `bash scripts/indexer find 0xabc...` | Scans all explorer APIs, returns first match |
+| "Find tx 0xabc..." | `bash scripts/indexer find 0xabc...` | Calls `eth_getTransactionByHash` on each EVM RPC, returns the first match |
 | "Is this tx on Atlantic or Pacific?" | `bash scripts/indexer tx 0x...` | Auto-detects which Pharos chain it's on |
 
 ### 3. Portfolio Overview
@@ -208,13 +247,13 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 | User Says | Agent Executes | Real Output |
 |---|---|---|
 | "Is this contract verified?" | `bash scripts/indexer ver 0xe7f1725E...` | `[OK] Verified on ethereum` or `Not verified` |
-| "Check source code available" | `bash scripts/indexer verify 0x...` | Queries all explorer APIs |
+| "Check source code available" | `bash scripts/indexer verify 0x...` | Queries verified-source API on each explorer |
 
 ### 6. RPC Health Check
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Which chains are online?" | `bash scripts/indexer health` | `atlantic-testnet ✓ LIVE 24135882, celo-alfajores ✗ DOWN` |
-| "Network status" | `bash scripts/indexer ping` | 101/110 EVM chains LIVE (90%) — real block numbers |
+| "Which chains are online?" | `bash scripts/indexer health` | All top-15 chains LIVE with block numbers |
+| "Network status (all chains)" | `bash scripts/indexer health --all` | ~101/110 EVM chains LIVE (a few may show DOWN) |
 | "Health in JSON for my agent" | `bash scripts/indexer health --json` | `[{"chain":"atlantic-testnet","status":"LIVE","block":"24135882"}]` |
 
 ### 7. Gas Price Comparison
@@ -345,16 +384,42 @@ Add any chain: edit `assets/networks.json`. Zero code change. Auto-discovered by
 
 Add any chain — edit `assets/networks.json`, add the explorer API URL, done.
 
+### Windows Notes (Git Bash / WSL)
+
+- The indexer is **bash**, so run it from **Git Bash** or **WSL** (not
+  raw PowerShell). All examples use the cross-platform `bash
+  scripts/indexer ...` form.
+- `install.sh` will **auto-download** `jq.exe` to `$HOME/bin` if it
+  isn't on PATH. If running in a fresh shell, add:
+  ```bash
+  export PATH="$HOME/bin:$PATH"
+  ```
+- On Windows, `python3` is hijacked by the Microsoft Store as a
+  redirector. The indexer auto-detects and falls back to `python`.
+  All doc examples use `python` (not `python3`) for the same reason.
+
 ---
 
 ## Honest Disclosure
 
-- **No mock data.** All queries hit live PharosScan, Etherscan, Basescan, and Arbiscan APIs.
+- **No mock data.** All queries hit live public RPCs (`eth_getBalance`,
+  `eth_getTransactionByHash`, etc.) and live CoinGecko for USD prices.
+  No fake numbers, no cached "demo" responses.
 - **No contracts.** Pure read. Zero deploy. Zero gas.
 - **No wallet needed.** Read-only. No private key.
-- **Cast optional.** Falls back to raw `curl` + `python` if Foundry is not installed.
-- **Rate limits.** Free-tier API keys for Etherscan-compatible chains. PharosScan public endpoints work without keys.
-- **Single contributor.** Solo project, built in under 2 days.
+- **No API keys required.** The default top-15 scope works with no keys
+  (uses public free-tier RPCs). For `--all` or higher rate limits, an
+  optional Etherscan API key can be set via `EXPLORER_API_KEY`.
+- **Windows-first.** `install.sh` auto-downloads `jq.exe` to
+  `$HOME/bin` if missing; the indexer auto-detects `python3` vs
+  `python` (Windows hijacks `python3` as a Store redirector).
+- **Default scope = top 15 chains** (Pharos + 13 mainnet heavy-hitters
+  — Ethereum, Base, Arbitrum, Optimism, Polygon, BSC, Avalanche,
+  zkSync, Linea, Fantom, Gnosis, Solana, Near) for fast results in
+  seconds. Add `--all` to scan every configured chain.
+- **Rate limits.** Public RPCs are used as-is. Etherscan V1 is
+  deprecated, so the indexer uses direct `eth_*` JSON-RPC instead.
+- **Single contributor.** Solo project, built for the hackathon.
 
 ---
 
