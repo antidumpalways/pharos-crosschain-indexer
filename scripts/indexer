@@ -51,6 +51,18 @@ if [[ "$JQ" == *.exe ]]; then
     fi
 fi
 
+# --- resolve python (Windows often has `python` not `python3`) ---
+# On Windows the Microsoft Store hijacks `python3` as a redirector that prints
+# "Python was not found". Detect once: prefer python3 (Linux/Mac), else python.
+if command -v python3 >/dev/null 2>&1 && python3 --version >/dev/null 2>&1; then
+    PY="$(command -v python3)"
+elif command -v python >/dev/null 2>&1 && python --version >/dev/null 2>&1; then
+    PY="$(command -v python)"
+else
+    echo -e "\033[0;31mERROR:\033[0m python not found. Install Python 3 and ensure \`python\` or \`python3\` is on PATH." >&2
+    exit 1
+fi
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -129,7 +141,7 @@ format_balance() {
         echo "$wei_hex" | xargs -I{} cast --from-wei {} 2>/dev/null || echo "0"
     else
         # Fallback: use bc or python
-        python3 -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0"
+        $PY -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0"
     fi
 }
 
@@ -173,14 +185,14 @@ cmd_balance() {
                 local sol_value
                 sol_value=$(echo "$sol_resp" | "$JQ" -r '.result.value // -1' 2>/dev/null)
                 if [ "$sol_value" != "-1" ] && [ -n "$sol_value" ]; then
-                    result=$(python3 -c "print(round(int($sol_value) / 1e9, 6))" 2>/dev/null || echo "0")
+                    result=$($PY -c "print(round(int($sol_value) / 1e9, 6))" 2>/dev/null || echo "0")
                 else result=""; fi
                 ;;
             bitcoin)
                 local btc_resp
                 btc_resp=$(curl -s "${rpc}/${addr}?confirmations=0" --connect-timeout 10 2>/dev/null) || true
                 if [ -n "$btc_resp" ] && [ "$btc_resp" != "0" ] 2>/dev/null; then
-                    result=$(python3 -c "print(int($btc_resp) / 1e8)" 2>/dev/null || echo "0")
+                    result=$($PY -c "print(int($btc_resp) / 1e8)" 2>/dev/null || echo "0")
                 else result="0"; fi
                 ;;
             tron)
@@ -188,28 +200,28 @@ cmd_balance() {
                 tron_resp=$(curl -s "${rpc}?address=${addr}" --connect-timeout 10 2>/dev/null) || true
                 local tron_bal
                 tron_bal=$(echo "$tron_resp" | "$JQ" -r '.balance // 0' 2>/dev/null)
-                result=$(python3 -c "print(int($tron_bal) / 1e6)" 2>/dev/null || echo "0")
+                result=$($PY -c "print(int($tron_bal) / 1e6)" 2>/dev/null || echo "0")
                 ;;
             near)
                 local near_resp
                 near_resp=$(curl -s "${rpc}/${addr}" --connect-timeout 10 2>/dev/null) || true
                 local near_bal
                 near_bal=$(echo "$near_resp" | "$JQ" -r '.account[0].amount // 0' 2>/dev/null)
-                result=$(python3 -c "print(int('$near_bal') / 1e24)" 2>/dev/null || echo "0")
+                result=$($PY -c "print(int('$near_bal') / 1e24)" 2>/dev/null || echo "0")
                 ;;
             cosmos)
                 local cosmos_resp
                 cosmos_resp=$(curl -s "${rpc}/${addr}" --connect-timeout 10 2>/dev/null) || true
                 local cosmos_bal
                 cosmos_bal=$(echo "$cosmos_resp" | "$JQ" -r '.balances[] | select(.denom==\"uatom\") | .amount // 0' 2>/dev/null)
-                result=$(python3 -c "print(int('$cosmos_bal') / 1e6)" 2>/dev/null || echo "0")
+                result=$($PY -c "print(int('$cosmos_bal') / 1e6)" 2>/dev/null || echo "0")
                 ;;
             dogecoin)
                 local doge_resp
                 doge_resp=$(curl -s "${rpc}/${addr}" --connect-timeout 10 2>/dev/null) || true
                 local doge_bal
                 doge_bal=$(echo "$doge_resp" | "$JQ" -r '.balance // 0' 2>/dev/null)
-                result=$(python3 -c "print(int('$doge_bal') / 1e8)" 2>/dev/null || echo "0")
+                result=$($PY -c "print(int('$doge_bal') / 1e8)" 2>/dev/null || echo "0")
                 ;;
             polkadot)
                 local dot_resp
@@ -217,14 +229,14 @@ cmd_balance() {
                     -d "{\"address\":\"${addr}\"}" --connect-timeout 10 2>/dev/null) || true
                 local dot_bal
                 dot_bal=$(echo "$dot_resp" | "$JQ" -r '.data.balance // 0' 2>/dev/null)
-                result=$(python3 -c "print(int('$dot_bal') / 1e10)" 2>/dev/null || echo "0")
+                result=$($PY -c "print(int('$dot_bal') / 1e10)" 2>/dev/null || echo "0")
                 ;;
             ton)
                 local ton_resp
                 ton_resp=$(curl -s "${rpc}?address=${addr}" --connect-timeout 10 2>/dev/null) || true
                 local ton_bal
                 ton_bal=$(echo "$ton_resp" | "$JQ" -r '.result.balance // 0' 2>/dev/null)
-                result=$(python3 -c "print(int('$ton_bal') / 1e9)" 2>/dev/null || echo "0")
+                result=$($PY -c "print(int('$ton_bal') / 1e9)" 2>/dev/null || echo "0")
                 ;;
             *)
                 if command -v cast >/dev/null 2>&1; then
@@ -236,7 +248,7 @@ cmd_balance() {
                         "$rpc" 2>/dev/null) || true
                     local wei_hex
                     wei_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
-                    result=$(python3 -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0")
+                    result=$($PY -c "print(int('$wei_hex', 16) / 1e18)" 2>/dev/null || echo "0")
                 fi
                 ;;
         esac
@@ -248,7 +260,7 @@ cmd_balance() {
             usd_price=$(get_usd_price "$nativeToken")
             if [ "$usd_price" != "N/A" ] && [ -n "$usd_price" ]; then
                 local usd_val
-                usd_val=$(python3 -c "print(round(float($result) * float($usd_price), 2))" 2>/dev/null || echo "N/A")
+                usd_val=$($PY -c "print(round(float($result) * float($usd_price), 2))" 2>/dev/null || echo "N/A")
                 usd_str=$(printf ' ($%.2f)' "$usd_val")
             fi
         fi
@@ -369,7 +381,7 @@ cmd_portfolio() {
                 "$rpc" 2>/dev/null) || true
             local wei_hex
             wei_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
-            native_bal=$(python3 -c "print(round(int('$wei_hex', 16) / 1e18, 4))" 2>/dev/null || echo "")
+            native_bal=$($PY -c "print(round(int('$wei_hex', 16) / 1e18, 4))" 2>/dev/null || echo "")
         fi
         if [ -n "$native_bal" ] && [ "$native_bal" != "0" ] && [ "$native_bal" != "0.0" ]; then
             printf "  %-14s %-8s %16s\n" "$chain" "$nativeToken" "$native_bal"
@@ -388,7 +400,7 @@ cmd_portfolio() {
                     raw="0x0"
                 fi
                 local bal
-                bal=$(python3 -c "print(round(int('$raw', 16) / 10**$decimals, 4))" 2>/dev/null || echo "0")
+                bal=$($PY -c "print(round(int('$raw', 16) / 10**$decimals, 4))" 2>/dev/null || echo "0")
                 if [ "$bal" != "0" ] && [ "$bal" != "0.0" ]; then
                     printf "  %-14s %-8s %16s\n" "$chain" "$symbol" "$bal"
                 fi
@@ -580,7 +592,7 @@ cmd_gas() {
         gas_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
         
         if [ -n "$gas_hex" ] && [ "$gas_hex" != "0x0" ] && [ "$gas_hex" != "null" ]; then
-            gas_gwei=$(python3 -c "print(round(int('$gas_hex', 16) / 1e9, 2))" 2>/dev/null || echo "?")
+            gas_gwei=$($PY -c "print(round(int('$gas_hex', 16) / 1e9, 2))" 2>/dev/null || echo "?")
         else
             gas_gwei="DOWN"
         fi
@@ -653,7 +665,7 @@ cmd_top() {
         else
             raw="0x0"
         fi
-        bal=$(python3 -c "print(round(int('$raw', 16) / 10**$decimals, 4))" 2>/dev/null || echo "0")
+        bal=$($PY -c "print(round(int('$raw', 16) / 10**$decimals, 4))" 2>/dev/null || echo "0")
         echo "$bal|$chain|$chainId" >> "$tmpfile"
     done < <(get_rpcs)
 
@@ -717,7 +729,7 @@ cmd_suggest() {
                 --connect-timeout 5 --max-time 10 "$rpc" 2>/dev/null) || true
             local wei_hex
             wei_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
-            native_bal=$(python3 -c "print(round(int('$wei_hex', 16) / 1e18, 6))" 2>/dev/null || echo "0")
+            native_bal=$($PY -c "print(round(int('$wei_hex', 16) / 1e18, 6))" 2>/dev/null || echo "0")
         fi
         echo "NATIVE|$chain|$nativeToken|$native_bal|$chainId|$rpc" >> "$tmpfile"
 
@@ -732,7 +744,7 @@ cmd_suggest() {
                 raw="0x0"
             fi
             local bal
-            bal=$(python3 -c "print(round(int('$raw', 16) / 1e6, 4))" 2>/dev/null || echo "0")
+            bal=$($PY -c "print(round(int('$raw', 16) / 1e6, 4))" 2>/dev/null || echo "0")
             echo "USDC|$chain|$bal|$rpc" >> "$tmpfile"
         fi
     done < <(get_rpcs)
@@ -748,7 +760,7 @@ cmd_suggest() {
         gas_hex=$(echo "$resp" | "$JQ" -r '.result // "0x0"' 2>/dev/null)
         if [ -n "$gas_hex" ] && [ "$gas_hex" != "0x0" ]; then
             local gwei
-            gwei=$(python3 -c "print(round(int('$gas_hex', 16) / 1e9, 2))" 2>/dev/null || echo "999")
+            gwei=$($PY -c "print(round(int('$gas_hex', 16) / 1e9, 2))" 2>/dev/null || echo "999")
             echo "$gwei|$chain|$rpc" >> "$gas_file"
         fi
     done < <(get_rpcs)
@@ -760,7 +772,7 @@ cmd_suggest() {
     local best_usdc_chain best_usdc_bal=0
     while IFS='|' read -r token chain bal rpc; do
         [ "$token" != "USDC" ] && continue
-        local is_gt; is_gt=$(python3 -c "print(1 if float($bal) > float($best_usdc_bal) else 0)" 2>/dev/null || echo "0")
+        local is_gt; is_gt=$($PY -c "print(1 if float($bal) > float($best_usdc_bal) else 0)" 2>/dev/null || echo "0")
         if [ "$is_gt" = "1" ]; then
             best_usdc_chain="$chain"; best_usdc_bal="$bal"
         fi
@@ -771,7 +783,7 @@ cmd_suggest() {
         # Find cheapest gas chain to bridge to
         local cheapest_gas_chain cheapest_gas=999
         while IFS='|' read -r gwei chain rpc; do
-            local is_lt; is_lt=$(python3 -c "print(1 if float($gwei) < float($cheapest_gas) else 0)" 2>/dev/null || echo "0")
+            local is_lt; is_lt=$($PY -c "print(1 if float($gwei) < float($cheapest_gas) else 0)" 2>/dev/null || echo "0")
             if [ "$is_lt" = "1" ] && [ "$chain" != "$best_usdc_chain" ]; then
                 cheapest_gas="$gwei"; cheapest_gas_chain="$chain"
             fi
@@ -801,7 +813,7 @@ cmd_suggest() {
     local gas_found=0
     while IFS='|' read -r type chain token bal cid rpc; do
         [ "$type" != "NATIVE" ] && continue
-        local is_gt; is_gt=$(python3 -c "print(1 if float($bal) > 0 else 0)" 2>/dev/null || echo "0")
+        local is_gt; is_gt=$($PY -c "print(1 if float($bal) > 0 else 0)" 2>/dev/null || echo "0")
         if [ "$is_gt" = "1" ]; then
             printf "    %-18s %12s %s\n" "$chain" "$bal" "$token"
             gas_found=$((gas_found + 1))

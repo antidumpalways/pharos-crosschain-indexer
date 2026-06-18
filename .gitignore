@@ -3,6 +3,11 @@
 *.tar.gz
 *.log
 
+# Generated runtime data (export.py, history.py, etc.)
+data/
+*.html
+*.csv
+
 # OS files
 .DS_Store
 Thumbs.db

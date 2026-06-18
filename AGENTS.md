@@ -115,7 +115,7 @@ User: "Show my full portfolio"
 Agent:
   • Reads SKILL.md -> trigger: "show my portfolio"
   • Has session address: 0xFF11f4Be...
-  • Executes: python3 scripts/multi.py 0xFF11f4Be...
+  • Executes: python scripts/multi.py 0xFF11f4Be...
 
   Chain          Token    Balance
   ───────────────────────────────
@@ -131,7 +131,7 @@ Agent:
   • "my" portfolio = session default (0xFF11f4Be...)
   • "Vitalik's" = explicit different address (0xd8dA6BF2...)
   • Keeps both in context
-  • Executes: python3 scripts/multi.py 0xd8dA6BF2...
+  • Executes: python scripts/multi.py 0xd8dA6BF2...
 
   ethereum-sepolia    58.24 ETH
   ethereum-sepolia   800.27 USDC
@@ -148,19 +148,19 @@ The agent should load `pharos-crosschain-indexer` when the user says ANY of:
 | Trigger phrase | Maps to |
 |---|---|
 | "check balance on all chains" / "balance everywhere" | `indexer bal` |
-| "show my portfolio" / "all tokens" | `python3 scripts/multi.py` |
+| "show my portfolio" / "all tokens" | `python scripts/multi.py` |
 | "where is this transaction" / "find tx" | `indexer tx` |
 | "who is this address" / "label" | `indexer lab` |
 | "is this verified" / "verify contract" | `indexer ver` |
 | "which chains are online" / "network status" | `indexer health` |
 | "compare gas prices" / "cheapest chain" | `indexer gas` |
 | "rank chains by USDC" / "top token" | `indexer top` |
-| "analyze my portfolio" / "suggest actions" | `python3 scripts/suggest.py` |
-| "export portfolio" / "generate report" | `python3 scripts/export.py` |
-| "snapshot my balance" / "record state" | `python3 scripts/diff.py save` |
-| "compare balance" / "what changed" | `python3 scripts/diff.py diff` |
-| "track history" / "balance over time" | `python3 scripts/history.py` |
-| "alert me" / "monitor wallet" | `python3 scripts/alert.py` |
+| "analyze my portfolio" / "suggest actions" | `python scripts/suggest.py` |
+| "export portfolio" / "generate report" | `python scripts/export.py` |
+| "snapshot my balance" / "record state" | `python scripts/diff.py save` |
+| "compare balance" / "what changed" | `python scripts/diff.py diff` |
+| "track history" / "balance over time" | `python scripts/history.py` |
+| "alert me" / "monitor wallet" | `python scripts/alert.py` |
 
 ## Before Executing (keep it minimal)
 
@@ -234,7 +234,7 @@ RPC queries have a 15-second timeout per chain. If a chain exceeds this, skip it
 **By default, multi-chain commands scan only the top 15 chains** (Pharos first, then major EVM + Solana + Near). This returns in seconds. Add `--all` **only** when the user explicitly says "all chains", "every chain", "all 112", or references an unusual chain. Never run `--all` speculatively — scanning 112 chains takes minutes and wastes the user's time. If the result is empty on the top 15, tell the user and offer `--all` rather than running it unprompted.
 
 ### R14 — One Command, No Guessing
-Pick **exactly one** command based on the user's intent (see the cheat-sheet in `SKILL.md`). Do not try `./script`, then `python`, then `bash` — the correct form is always `bash scripts/indexer <cmd>` (or `python3 scripts/<name>.py` for the Python tools). If the intent is ambiguous, ask the user instead of running multiple commands.
+Pick **exactly one** command based on the user's intent (see the cheat-sheet in `SKILL.md`). Do not try `./script`, then `python`, then `bash` — the correct form is always `bash scripts/indexer <cmd>` (or `python scripts/<name>.py` for the Python tools). If the intent is ambiguous, ask the user instead of running multiple commands.
 
 ## Session Context Example
 

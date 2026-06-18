@@ -64,7 +64,7 @@ Agent reads indexer.md → command template: scripts/indexer balance <addr>
 indexer reads assets/networks.json → iterates over chains with rpcUrl
 For each chain:
   → cast balance <addr> --rpc-url <rpc> --ether
-  → OR curl eth_getBalance → python3 hex-to-decimal
+  → OR curl eth_getBalance → python hex-to-decimal
   → Print: <chain> <balance> <symbol>
 ```
 

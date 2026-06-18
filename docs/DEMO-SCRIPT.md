@@ -11,7 +11,7 @@
 LO: "Install the Pharos cross-chain indexer"
 
 AGENT: [clones repo, runs install.sh]
-       [OK] curl, jq, python3 — all found
+       [OK] curl, jq, python — all found
        [OK] 112 chains configured (110 EVM + Solana + Near)
        Ready.
 ```
@@ -25,7 +25,7 @@ LO: "Analyze my portfolio on every chain — where should I bridge?"
 
 AGENT: [SKILL.md -> trigger 'analyze my portfolio'
        -> Capability Index -> suggest -> references/suggest.md]
-       [Executes: python3 scripts/suggest.py 0xf39Fd6...]
+       [Executes: python scripts/suggest.py 0xf39Fd6...]
        [Queries 112 RPCs — native balances, gas prices, token availability]
 
 =========================================================
@@ -63,7 +63,7 @@ LO: "Show Vitalik's full portfolio — all chains, all tokens, mainnet"
 
 AGENT: [SKILL.md -> trigger 'show my full portfolio'
        -> Capability Index -> portfolio -> references/portfolio.md]
-       [Executes: python3 scripts/multi.py 0xd8dA6BF269...]
+       [Executes: python scripts/multi.py 0xd8dA6BF269...]
        [Queries ALL 112 chains — native + ERC-20 tokens]
 
   Multi-Address Portfolio (1 address x 112 chains)
@@ -106,7 +106,7 @@ LO: "Export Vitalik's portfolio to CSV and HTML"
 
 AGENT: [SKILL.md -> trigger 'export portfolio'
        -> Capability Index -> export -> references/export.md]
-       [Executes: python3 scripts/export.py 0xd8dA6BF2... csv]
+       [Executes: python scripts/export.py 0xd8dA6BF2... csv]
 
   CSV exported: data/portfolio_0xd8dA6BF2.csv (25 rows)
   Chain,ChainID,Token,Balance
@@ -117,7 +117,7 @@ AGENT: [SKILL.md -> trigger 'export portfolio'
 
 LO: "Now HTML"
 
-AGENT: [Executes: python3 scripts/export.py 0xd8dA6BF2... html]
+AGENT: [Executes: python scripts/export.py 0xd8dA6BF2... html]
 
   HTML exported: data/portfolio_0xd8dA6BF2.html
   [Opens browser — dark theme, full report]
@@ -135,7 +135,7 @@ LO: "Which chains are online and where's gas cheapest?"
 
 AGENT: [SKILL.md -> trigger 'which chains are online'
        -> health -> references/health.md]
-       [Executes: python3 scripts/suggest.py 0xf39Fd6... | head -35]
+       [Executes: python scripts/suggest.py 0xf39Fd6... | head -35]
 
   101/110 EVM chains LIVE (90%). 9 DEAD. 2 NON-EVM.
 
@@ -165,17 +165,17 @@ LO: "Record a snapshot of my balance now"
 
 AGENT: [SKILL.md -> trigger 'snapshot my balance'
        -> diff -> references/diff.md]
-       [Executes: python3 scripts/diff.py save 0xf39Fd6...]
+       [Executes: python scripts/diff.py save 0xf39Fd6...]
 
   Snapshot saved: 33 chains with balance.
   File: data/snapshot.json
 
 LO: "Start tracking history — and alert me if balance changes by 1 PHRS"
 
-AGENT: [Executes: python3 scripts/history.py record 0xf39Fd6...]
+AGENT: [Executes: python scripts/history.py record 0xf39Fd6...]
   Recorded: 33 chains at Tue Jun 16 04:26:45 2026
 
-AGENT: [Executes: python3 scripts/alert.py 0xf39Fd6... atlantic-testnet 1.0 60]
+AGENT: [Executes: python scripts/alert.py 0xf39Fd6... atlantic-testnet 1.0 60]
 
   Monitoring atlantic-testnet every 60s (threshold +/- 1.0 PHRS)
   [04:27:00] No change.     [04:28:00] No change.

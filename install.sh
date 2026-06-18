@@ -34,9 +34,31 @@ if ! command -v jq &>/dev/null; then
     case "$OS" in
         linux)   echo "    Install: sudo apt-get install jq";;
         macos)   echo "    Install: brew install jq";;
-        windows) echo "    Install: winget install jqlang.jq OR choco install jq";;
+        windows)
+            # On Git Bash, auto-install jq to $HOME/bin for portability
+            JQ_DEST="$HOME/bin/jq.exe"
+            JQ_URL="https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-win64.exe"
+            if [ ! -x "$JQ_DEST" ]; then
+                mkdir -p "$HOME/bin" 2>/dev/null || true
+                if command -v curl &>/dev/null; then
+                    echo "    Auto-downloading jq to $JQ_DEST ..."
+                    if curl -sSL -o "$JQ_DEST" "$JQ_URL" && [ -s "$JQ_DEST" ]; then
+                        echo "    [OK] jq auto-installed at $JQ_DEST"
+                        echo "    Tip: add $HOME/bin to your PATH:  export PATH=\"\$HOME/bin:\$PATH\""
+                        MISSING=""  # rescued
+                        # Make it available for this session
+                        export PATH="$HOME/bin:$PATH"
+                    else
+                        echo "    Install: winget install jqlang.jq OR choco install jq"
+                        MISSING="$MISSING jq"
+                    fi
+                else
+                    echo "    Install: winget install jqlang.jq OR choco install jq"
+                    MISSING="$MISSING jq"
+                fi
+            fi
+            ;;
     esac
-    MISSING="$MISSING jq"
 else
     echo "  [OK] jq ($(jq --version 2>&1))"
 fi
@@ -48,13 +70,13 @@ else
     echo "    Install Foundry: curl -L https://foundry.paradigm.xyz | bash"
 fi
 
-if command -v python3 &>/dev/null; then
-    echo "  [OK] python3 (fallback for RPC queries without cast)"
+if command -v python &>/dev/null; then
+    echo "  [OK] python (fallback for RPC queries without cast)"
 else
-    echo "  [OPT] python3 not found — needed as fallback when cast is missing"
+    echo "  [OPT] python not found — needed as fallback when cast is missing"
     case "$OS" in
-        linux)   echo "    Install: sudo apt-get install python3";;
-        macos)   echo "    python3 is pre-installed on macOS";;
+        linux)   echo "    Install: sudo apt-get install python";;
+        macos)   echo "    python is pre-installed on macOS";;
         windows) echo "    Install: winget install Python.Python.3";;
     esac
 fi
@@ -77,22 +99,25 @@ for f in "$SCRIPT_DIR/examples/"*.sh; do
 done
 echo "  [OK] examples executable"
 
-# Quick self-test (Atlantic testnet balance)
+# Quick self-test (indexer help — no address needed, just proves bash + jq + python work)
 echo ""
 echo "  --- Quick self-test ---"
-bash "$SCRIPT_DIR/scripts/indexer" balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 atlantic-testnet 2>/dev/null | head -6 || echo "  (skipped — run manually for verification)"
+bash "$SCRIPT_DIR/scripts/indexer" help 2>&1 | head -6 || echo "  (skipped — run manually for verification)"
 
 echo ""
 echo "================================================================"
 echo "  Installation complete"
 echo "================================================================"
 echo ""
-echo "  Quick start:"
+echo "  Quick start (replace <YOUR_ADDRESS> with your 0x... address):"
 echo "    bash scripts/indexer help"
-echo "    bash scripts/indexer balance 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-echo "    bash scripts/indexer portfolio 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+echo "    bash scripts/indexer balance <YOUR_ADDRESS>"
+echo "    bash scripts/indexer portfolio <YOUR_ADDRESS>"
 echo "    bash scripts/indexer health"
 echo "    bash scripts/indexer gas"
+echo ""
+echo "  On Windows (Git Bash), if 'jq' is missing, ensure \$HOME/bin is on PATH:"
+echo "    export PATH=\"\$HOME/bin:\$PATH\""
 echo ""
 echo "  Demo scripts:"
 echo "    bash examples/crosschain-balance.sh <address>"

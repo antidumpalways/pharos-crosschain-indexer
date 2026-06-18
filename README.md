@@ -241,35 +241,35 @@ pharos-crosschain-indexer/          <-- YOUR SUBMISSION
 ### 10. Export Portfolio
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Export my portfolio to CSV" | `python3 scripts/export.py <ADDRESS> csv` | `data/portfolio.csv` |
-| "Generate HTML report" | `python3 scripts/export.py <ADDRESS> html` | `data/portfolio.html` |
-| "Download portfolio for compliance" | `python3 scripts/export.py 0x... csv` | Ready for Excel / Google Sheets import |
+| "Export my portfolio to CSV" | `python scripts/export.py <ADDRESS> csv` | `data/portfolio.csv` |
+| "Generate HTML report" | `python scripts/export.py <ADDRESS> html` | `data/portfolio.html` |
+| "Download portfolio for compliance" | `python scripts/export.py 0x... csv` | Ready for Excel / Google Sheets import |
 
 ### 11. Balance Snapshot
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Snapshot my balance" | `python3 scripts/diff.py save 0x...` | `Snapshot saved: 13 chains with balance` |
-| "Record current state" | `python3 scripts/diff.py save 0x...` | JSON saved to `data/snapshot.json` |
+| "Snapshot my balance" | `python scripts/diff.py save 0x...` | `Snapshot saved: 13 chains with balance` |
+| "Record current state" | `python scripts/diff.py save 0x...` | JSON saved to `data/snapshot.json` |
 
 ### 12. Balance Diff
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Compare with my last snapshot" | `python3 scripts/diff.py diff 0x...` | `Chain, Before, After, Delta` table |
-| "How much did my balance change?" | `python3 scripts/diff.py diff 0x...` | Shows ± changes per chain |
+| "Compare with my last snapshot" | `python scripts/diff.py diff 0x...` | `Chain, Before, After, Delta` table |
+| "How much did my balance change?" | `python scripts/diff.py diff 0x...` | Shows ± changes per chain |
 
 ### 13. History Tracking
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Track my balance over time" | `python3 scripts/history.py record 0x...` | `Recorded: 33 chains at Tue Jun 16` |
-| "Show balance history" | `python3 scripts/history.py show` | Time-series table + chain-specific trends |
-| "How many snapshots?" | `python3 scripts/history.py count` | `3` |
+| "Track my balance over time" | `python scripts/history.py record 0x...` | `Recorded: 33 chains at Tue Jun 16` |
+| "Show balance history" | `python scripts/history.py show` | Time-series table + chain-specific trends |
+| "How many snapshots?" | `python scripts/history.py count` | `3` |
 
 ### 14. Balance Alert
 | User Says | Agent Executes | Real Output |
 |---|---|---|
-| "Alert me if balance changes" | `python3 scripts/alert.py 0x...` | Monitors every 30s, prints 🔺/🔻 on change |
-| "Watch Atlantic for ±1 PHRS" | `python3 scripts/alert.py 0x... atlantic-testnet 1.0 60` | Checks every 60s, alerts if delta > 1 PHRS |
-| "Notify on any wallet movement" | `python3 scripts/alert.py 0x... all 0.001 30` | Watches all 112 chains every 30s |
+| "Alert me if balance changes" | `python scripts/alert.py 0x...` | Monitors every 30s, prints 🔺/🔻 on change |
+| "Watch Atlantic for ±1 PHRS" | `python scripts/alert.py 0x... atlantic-testnet 1.0 60` | Checks every 60s, alerts if delta > 1 PHRS |
+| "Notify on any wallet movement" | `python scripts/alert.py 0x... all 0.001 30` | Watches all 112 chains every 30s |
 
 ---
 
@@ -352,7 +352,7 @@ Add any chain — edit `assets/networks.json`, add the explorer API URL, done.
 - **No mock data.** All queries hit live PharosScan, Etherscan, Basescan, and Arbiscan APIs.
 - **No contracts.** Pure read. Zero deploy. Zero gas.
 - **No wallet needed.** Read-only. No private key.
-- **Cast optional.** Falls back to raw `curl` + `python3` if Foundry is not installed.
+- **Cast optional.** Falls back to raw `curl` + `python` if Foundry is not installed.
 - **Rate limits.** Free-tier API keys for Etherscan-compatible chains. PharosScan public endpoints work without keys.
 - **Single contributor.** Solo project, built in under 2 days.
 

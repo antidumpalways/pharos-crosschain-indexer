@@ -41,7 +41,7 @@ Developers cobble together per-chain explorers and per-chain RPC queries. This s
 - **Zero mocks.** Every API endpoint queried is real (PharosScan, Etherscan, Basescan, Arbiscan).
 - **Zero contracts.** Pure read operations. No deploy, no gas, no wallet.
 - **Zero fake addresses.** All token addresses in `tokens.json` sourced from official Pharos docs + public token registries.
-- **`cast` is optional.** Falls back to raw `curl` + `python3` for RPC queries if Foundry is not installed.
+- **`cast` is optional.** Falls back to raw `curl` + `python` for RPC queries if Foundry is not installed.
 - **Rate limits.** Free-tier API keys needed for Etherscan-compatible chains. PharosScan works without a key on public endpoints.
 - **Single-contributor project.** Built solo for the hackathon.
 

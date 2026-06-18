@@ -101,7 +101,7 @@ requires:
   anyBins:
     - curl
     - jq
-    - python3
+    - python
   optionalBins:
     - cast
 ---
@@ -117,7 +117,7 @@ requires:
 | Layer | pharos-skill-engine (parent) | pharos-crosschain-indexer (this skill) |
 |---|---|---|
 | Operation type | **WRITE** — send tx, deploy, verify, airdrop | **READ** — query balances, txs, labels, gas, health |
-| Required bins | `cast`, `forge` (Foundry) | `curl`, `jq`, `python3` (no Foundry needed) |
+| Required bins | `cast`, `forge` (Foundry) | `curl`, `jq`, `python` (no Foundry needed) |
 | Asset folder | `assets/networks.json` (2 chains) | `assets/networks.json` (112 chains) |
 | Reference files | `query.md`, `transaction.md`, `contract.md`, `script-gen.md` | `balance.md`, `tx.md`, `portfolio.md`, `label.md`, `verify.md`, `health.md`, `gas.md`, `top.md`, `add-chain.md` |
 
@@ -125,11 +125,11 @@ The indexer is a **sibling-style extension** — it does not import or call into
 
 ## Prerequisites
 
-1. **`curl` + `jq` + `python3`** — required. The agent must run `which curl` / `which jq` / `which python3` once and install any missing tool before running commands:
-   - Linux: `apt-get install -y curl jq python3`
-   - macOS: `brew install curl jq python3`
+1. **`curl` + `jq` + `python`** — required. The agent must run `which curl` / `which jq` / `which python` once and install any missing tool before running commands:
+   - Linux: `apt-get install -y curl jq python`
+   - macOS: `brew install curl jq python`
    - Windows: `winget install jqlang.jq` + `winget install Python.Python.3`
-2. **Optional `cast` (Foundry)** — if present, the indexer uses it for faster RPC calls; otherwise it falls back to `curl` + `python3` (slower but works).
+2. **Optional `cast` (Foundry)** — if present, the indexer uses it for faster RPC calls; otherwise it falls back to `curl` + `python` (slower but works).
 3. **Optional API keys** — free tier works without a key for public endpoints; for higher rate limits:
    - PharosScan: https://api.socialscan.io
    - Etherscan-compatible chains: free tier API key per chain
@@ -201,12 +201,12 @@ Load the corresponding reference file based on user needs to get full command te
 
 | User Need | Capability | Detailed Instructions |
 |-----------|------------|----------------------|
-| Export portfolio to CSV / export to HTML / download report for compliance | `python3 scripts/export.py <addr> [csv\|html]` | → `references/portfolio.md#export` |
-| Snapshot my balance / record current state / save balances for later | `python3 scripts/diff.py save <addr>` | → `references/portfolio.md#snapshot` |
-| Compare balance changes / what changed since my last snapshot / balance diff | `python3 scripts/diff.py diff <addr>` | → `references/portfolio.md#diff` |
-| Track my balance over time / show balance history / time-series | `python3 scripts/history.py record\|show\|count <addr>` | → `references/portfolio.md#history` |
-| Alert me if balance changes / monitor my wallet / watch for movement | `python3 scripts/alert.py <addr> [chain] [threshold] [interval]` | → `references/portfolio.md#alert` |
-| Aggregate multiple addresses / combined portfolio view | `python3 scripts/multi.py <addr1> <addr2> ...` | → `references/portfolio.md#multi-address` |
+| Export portfolio to CSV / export to HTML / download report for compliance | `python scripts/export.py <addr> [csv\|html]` | → `references/portfolio.md#export` |
+| Snapshot my balance / record current state / save balances for later | `python scripts/diff.py save <addr>` | → `references/portfolio.md#snapshot` |
+| Compare balance changes / what changed since my last snapshot / balance diff | `python scripts/diff.py diff <addr>` | → `references/portfolio.md#diff` |
+| Track my balance over time / show balance history / time-series | `python scripts/history.py record\|show\|count <addr>` | → `references/portfolio.md#history` |
+| Alert me if balance changes / monitor my wallet / watch for movement | `python scripts/alert.py <addr> [chain] [threshold] [interval]` | → `references/portfolio.md#alert` |
+| Aggregate multiple addresses / combined portfolio view | `python scripts/multi.py <addr1> <addr2> ...` | → `references/portfolio.md#multi-address` |
 
 ### Group C — Composable Actions (read → suggest → write)
 
@@ -293,7 +293,7 @@ Before executing commands, the Agent should perform pre-checks; when commands fa
 |---------------|--------------------|----------|
 | Missing required bin | `jq: command not found` | Install: `apt-get install jq` / `brew install jq` / `winget install jqlang.jq` |
 | Missing required bin | `curl: command not found` | Install: `apt-get install curl` (pre-installed on macOS) |
-| Missing required bin | `python3: command not found` | Install: `apt-get install python3` / `brew install python3` |
+| Missing required bin | `python: command not found` | Install: `apt-get install python` / `brew install python` |
 | Optional bin missing | `cast: command not found` | Optional — fall back to curl. For speed: `curl -L https://foundry.paradigm.xyz \| bash && foundryup` |
 | Invalid address format | `invalid address` (in `cast` output) | Confirm address is `0x` + 40 hex characters (42 chars total) |
 | Connection refused | `curl: (7) Failed to connect` | Check Pharos Discord `#atlantic-status`; try the next chain in `networks.json` |

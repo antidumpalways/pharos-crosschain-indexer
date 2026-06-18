@@ -152,7 +152,7 @@ jq 'del(.networks[] | select(.name == "<chain-name>"))' assets/networks.json > /
 
 | Error | Cause | Fix |
 |---|---|---|
-| `json: parse error` | JSON syntax error in the added entry | Validate with `python3 -m json.tool assets/networks.json` |
+| `json: parse error` | JSON syntax error in the added entry | Validate with `python -m json.tool assets/networks.json` |
 | `(unreachable)` after adding | RPC URL wrong or unreachable | Check RPC URL at https://chainlist.org |
 | Chain not appearing in output | `name` field mismatch | Verify name matches what you used in `--chain` flag |
 | Explorer queries fail | Wrong `explorerApiUrl` | Verify at the chain's block explorer docs |
@@ -162,6 +162,6 @@ jq 'del(.networks[] | select(.name == "<chain-name>"))' assets/networks.json > /
 > 2. Look up the correct chain ID, RPC URL, and explorer API URL
 > 3. Append the entry to `assets/networks.json` using `jq` (single command)
 > 4. If tokens are known, also add to `assets/tokens.json`
-> 5. Run `python3 -m json.tool assets/networks.json` to validate JSON
+> 5. Run `python -m json.tool assets/networks.json` to validate JSON
 > 6. Test with `bash scripts/indexer balance <address> <new-chain-name>`
 > 7. Tell the user the chain is added and ready

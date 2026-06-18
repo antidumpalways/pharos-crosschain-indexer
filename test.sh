@@ -54,7 +54,7 @@ done
 echo ""
 echo "3. JSON validation"
 for f in assets/networks.json assets/tokens.json skills.json; do
-    if python3 -m json.tool "$SCRIPT_DIR/$f" > /dev/null 2>&1; then
+    if python -m json.tool "$SCRIPT_DIR/$f" > /dev/null 2>&1; then
         pass "$f is valid JSON"
     else
         fail "$f is invalid JSON" "fix syntax in $f"
@@ -71,10 +71,10 @@ for dep in curl jq; do
         fail "$dep missing" "install with apt-get/brew"
     fi
 done
-if command -v python3 > /dev/null 2>&1; then
-    pass "python3 found"
+if command -v python > /dev/null 2>&1; then
+    pass "python found"
 else
-    fail "python3 missing" "install with apt-get/brew"
+    fail "python missing" "install with apt-get/brew"
 fi
 if command -v cast > /dev/null 2>&1; then
     pass "cast (Foundry) found - faster RPC enabled"
