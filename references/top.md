@@ -19,12 +19,20 @@ bash scripts/indexer top <address> [token-symbol] [--json] [--all]
 | address | address | Yes | EOA or contract address |
 | token-symbol | string | No | Token symbol from `tokens.json` (default: USDC) |
 
-## Output
+## Output Parsing
 ```
   atlantic-testnet         5000.0
   pacific-mainnet          1000.0
   ethereum-sepolia             0.0
 ```
+
+| Field | Description |
+|---|---|
+| rank | Sort position (1 = highest balance) |
+| chain | Network name from `networks.json` |
+| chainId | EVM chain ID |
+| balance | Human-readable token balance (decimals applied) |
+| token | Token symbol queried |
 
 ## Error Handling
 | Error | Cause | Fix |

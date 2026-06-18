@@ -325,9 +325,9 @@ cmd_portfolio() {
 
     while IFS='|' read -r chain rpc chainId nativeToken ctype; do
         # Native balance
-        local native_bal
+        local native_bal=""
         if command -v cast >/dev/null 2>&1; then
-            native_bal=$(cast balance "$addr" --rpc-url "$rpc" --ether 2>/dev/null) || native_bal="ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"
+            native_bal=$(cast balance "$addr" --rpc-url "$rpc" --ether 2>/dev/null) || native_bal=""
         else
             local resp
             resp=$(curl -s -X POST -H "Content-Type: application/json" \
@@ -335,9 +335,9 @@ cmd_portfolio() {
                 "$rpc" 2>/dev/null) || true
             local wei_hex
             wei_hex=$(echo "$resp" | jq -r '.result // "0x0"' 2>/dev/null)
-            native_bal=$(python3 -c "print(round(int('$wei_hex', 16) / 1e18, 4))" 2>/dev/null || echo "0")
+            native_bal=$(python3 -c "print(round(int('$wei_hex', 16) / 1e18, 4))" 2>/dev/null || echo "")
         fi
-        if [ "$native_bal" != "0" ] && [ "$native_bal" != "0.0" ] && [ "$native_bal" != "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â" ]; then
+        if [ -n "$native_bal" ] && [ "$native_bal" != "0" ] && [ "$native_bal" != "0.0" ]; then
             printf "  %-14s %-8s %16s\n" "$chain" "$nativeToken" "$native_bal"
         fi
 
@@ -773,7 +773,7 @@ cmd_suggest() {
             gas_found=$((gas_found + 1))
         fi
     done < "$tmpfile"
-    [ "$gas_found" -eq 0 ] && echo "    (none â€” fund a wallet first)"
+    [ "$gas_found" -eq 0 ] && echo "    (none - fund a wallet first)"
 
     echo ""
     echo "  $suggestions suggestions generated."

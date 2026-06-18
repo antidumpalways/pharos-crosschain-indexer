@@ -18,12 +18,13 @@ bash scripts/indexer label <address>
 |---|---|---|---|
 | address | address | Yes | The address to label |
 
-## Output
+## Output Parsing
 | Field | Description |
 |---|---|
 | label | Human-readable label (ENS, social name, contract name) |
 | chain | Chain where the label was found |
-| source | Source (PharosScan social, Etherscan verified contract) |
+| category | Optional category (e.g. `wallet`, `contract`, `social`) |
+| source | Origin — `PharosScan social`, `Etherscan verified contract`, etc. |
 
 ## Error Handling
 | Error | Cause | Fix |

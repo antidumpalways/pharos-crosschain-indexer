@@ -18,12 +18,19 @@ bash scripts/indexer gas [chain] [--json] [--all]
 |---|---|---|---|
 | chain | string | No | Filter to one chain; omit for all 15 |
 
-## Output
+## Output Parsing
 ```
   atlantic-testnet      688689    10.0 gwei
   ethereum-sepolia    11155111     1.05 gwei
   polygon-amoy          80002    30.0 gwei
 ```
+
+| Field | Description |
+|---|---|
+| chain | Network name from `networks.json` |
+| chainId | EVM chain ID |
+| gasGwei | Current gas price in gwei (decimal) |
+| status | `DOWN` if RPC unreachable |
 
 ## Error Handling
 | Error | Cause | Fix |

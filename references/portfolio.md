@@ -19,14 +19,20 @@ bash scripts/indexer portfolio <address> [chain] [--all]
 | address | address | Yes | EOA or contract address |
 | chain | string | No | Filter to one chain; omit for all |
 
-## Output
+## Output Parsing
 ```
-Chain             Token    Balance
-────────────────────────────────────
-atlantic-testnet   PHRS     14.9555
-atlantic-testnet   USDC   5000.0000
-pacific-mainnet    PROS    250.0000
+  Chain             Token    Balance
+  ────────────────────────────────────
+  atlantic-testnet   PHRS     14.9555
+  atlantic-testnet   USDC   5000.0000
+  pacific-mainnet    PROS    250.0000
 ```
+
+| Field | Description |
+|---|---|
+| chain | Network name from `networks.json` |
+| token | Token symbol (native PHRS/PROS/ETH or ERC-20 like USDC) |
+| balance | Human-readable token balance (decimals applied) |
 
 ## Error Handling
 | Error | Cause | Fix |

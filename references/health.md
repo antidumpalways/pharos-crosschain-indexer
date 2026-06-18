@@ -19,19 +19,29 @@ bash scripts/indexer health [chain] [--json] [--all]
 | chain | string | No | Filter to a specific chain; omit for all 15 |
 | --json | flag | No | Machine-readable JSON output for agent consumption |
 
-## Output (human)
+## Output Parsing
+
+**Human-readable (default):**
 ```
-  atlantic-testnet  688689  ✓ LIVE  24135882
-  pacific-mainnet     1672  ✓ LIVE  10049249
-  celo-alfajores      44787  ✗ DOWN  -
+  atlantic-testnet  688689  LIVE  24135882
+  pacific-mainnet     1672  LIVE  10049249
+  celo-alfajores      44787  DOWN  -
 ```
 
-## Output (JSON with --json)
+**JSON (with `--json`):**
 ```json
 [
   {"chain":"atlantic-testnet","chainId":688689,"status":"LIVE","block":"24135882","rpc":"https://..."}
 ]
 ```
+
+| Field | Description |
+|---|---|
+| chain | Network name from `networks.json` |
+| chainId | EVM chain ID |
+| status | `LIVE` (RPC responded with a valid block) or `DOWN` (timeout / unreachable) |
+| block | Latest block number (decimal) when LIVE; `-` when DOWN |
+| rpc | The RPC URL that was pinged |
 
 ## Error Handling
 | Error | Cause | Fix |

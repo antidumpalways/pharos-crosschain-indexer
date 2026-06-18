@@ -19,12 +19,12 @@ bash scripts/indexer verify <contract-address> [chain]
 | address | address | Yes | Contract address to check |
 | chain | string | No | Single chain; omit for auto-detect |
 
-## Output
+## Output Parsing
 | Field | Description |
 |---|---|
 | chain | Chain where verified |
-| verified | true / false |
-| sourceUrl | Link to verified source on the explorer |
+| verified | `true` / `false` |
+| sourceUrl | Link to the verified source on the explorer |
 
 ## Error Handling
 | Error | Cause | Fix |
